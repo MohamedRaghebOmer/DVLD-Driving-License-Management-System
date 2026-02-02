@@ -3,7 +3,7 @@ using System.Data;
 using DVLD.Data;
 using DVLD.Core.Logging;
 using DVLD.Core.DTOs.Entities;
-using DVLD.Business.EntityValidations;
+using DVLD.Business.EntityValidators;
 
 namespace DVLD.Business
 {
@@ -43,7 +43,7 @@ namespace DVLD.Business
             // Add new country
             if (country.CountryID == -1)
             {
-                CountryValidator.ValidateAddNew(country);
+                CountryValidator.AddNewValidator(country);
 
                 try
                 {
@@ -57,7 +57,7 @@ namespace DVLD.Business
             }
             else // Update existing country
             {
-                CountryValidator.ValidateUpdate(country);
+                CountryValidator.UpdateValidator(country);
 
                 try
                 {
