@@ -1,14 +1,16 @@
 ﻿using System;
+using DVLD.Data.Settings;
 using System.Data.SqlClient;
 using DVLD.Core.Logging;
 using DVLD.Core.DTOs.Entities;
+using System.Data;
 
 namespace DVLD.Data
 {
     public static class CountryService
     {
         // -------------------------Create----------------------
-        public static bool AddNewCountry(Country country)
+        public static bool AddNew(Country country)
         {
             string query = @"INSERT INTO Countries(CountryName)
                             VALUES(@countryName)
@@ -43,7 +45,7 @@ namespace DVLD.Data
 
 
         // -------------------------Read------------------------
-        public static Country GetCountryInfoByID(int countryID)
+        public static Country GetCountry(int countryID)
         {
             string query = @"SELECT CountryName
                             FROM Countries
@@ -74,7 +76,7 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsCountryExist(int countryID)
+        public static bool IsExists(int countryID)
         {
             string query = @"SELECT 1
                             FROM Countries
@@ -99,7 +101,32 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsCountryExist(string countryName, int excludedId)
+        public static bool IsExists(string countryName)
+        {
+            string query = @"SELECT 1
+                            FROM Countries
+                            WHERE CountryName = @countryName;";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@countryName", countryName);
+
+                    connection.Open();
+
+                    return command.ExecuteScalar() != null;
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError("DAL: Error while selecting from Countries.", ex);
+                throw;
+            }
+        }
+
+        public static bool IsExists(string countryName, int excludedID)
         {
             string query = @"SELECT 1 
                             FROM Countries 
@@ -110,7 +137,7 @@ namespace DVLD.Data
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@excludedId", excludedId);
+                    command.Parameters.AddWithValue("@excludedId", excludedID);
                     command.Parameters.AddWithValue("@countryName", countryName);
 
                     connection.Open();
@@ -125,9 +152,38 @@ namespace DVLD.Data
             }
 
         }
-        
+
+        public static DataTable GetAll()
+        {
+            string query = @"SELECT CountryID, CountryName
+                            FROM Countries
+                            ORDER BY CountryName;";
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        DataTable countriesTable = new DataTable();
+                        countriesTable.Load(reader);
+
+                        return countriesTable;
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                AppLogger.LogError("DAL: Error while selecting all from Countries.", ex);
+                throw;
+            }
+        }
+
+
         // ------------------------Update-----------------------
-        public static bool UpdateCountry(Country country)
+        public static bool Update(Country country)
         {
             string query = @"UPDATE Countries
                             SET CountryName = @newCountryName
@@ -155,7 +211,7 @@ namespace DVLD.Data
 
 
         // ------------------------Delete-----------------------
-        public static bool DeleteCountry(int countryID)
+        public static bool Delete(int countryID)
         {
             string query = @"DELETE FROM Countries
                             WHERE CountryID = @countryID;";

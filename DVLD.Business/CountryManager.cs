@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Data;
 using DVLD.Data;
 using DVLD.Core.Logging;
 using DVLD.Core.DTOs.Entities;
-using DVLD.Core.Exceptions;
+using DVLD.Business.EntityValidations;
 
 namespace DVLD.Business
 {
@@ -15,7 +16,7 @@ namespace DVLD.Business
              
             try
             {
-                return CountryService.GetCountryInfoByID(id);
+                return CountryService.GetCountry(id);
             }
             catch(Exception ex)
             {
@@ -24,41 +25,62 @@ namespace DVLD.Business
             }
         }
 
-        public static bool Save(Country country)
+        public static DataTable GetAll()
         {
-            if (country.CountryName.Length < 3)
-                throw new BusinessException("Country name must be at least 3 characters long.");
-
-            if (CountryService.IsCountryExist(country.CountryName, country.CountryID))
-            {
-                throw new BusinessException($"The country name '{country.CountryName}' is already taken by another record.");
-            }
-
             try
             {
-                if (country.CountryID == -1)
-                    return CountryService.AddNewCountry(country);
-                else
-                    return CountryService.UpdateCountry(country);
+                return CountryService.GetAll();
             }
             catch (Exception ex)
             {
-                AppLogger.LogError($"BLL: Error saving country {country.CountryName}", ex);
-                throw new Exception("A technical error occurred while saving. Please try again later.", ex);
+                AppLogger.LogError("BLL: Error while reading all countries.", ex);
+                throw new Exception("We encountered a technical issue. Please try again later.", ex);
+            }
+        }
+
+        public static bool Save(Country country)
+        {
+            // Add new country
+            if (country.CountryID == -1)
+            {
+                CountryValidator.ValidateAddNew(country);
+
+                try
+                {
+                    return CountryService.AddNew(country);
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.LogError($"BLL: Error adding new country {country.CountryName}", ex);
+                    throw new Exception("We encountered a technical issue. Please try again later.", ex);
+                }
+            }
+            else // Update existing country
+            {
+                CountryValidator.ValidateUpdate(country);
+
+                try
+                {
+                    return CountryService.Update(country);
+
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.LogError($"BLL: Error updating country {country.CountryName}", ex);
+                    throw new Exception("We encountered a technical issue. Please try again later.", ex);
+                }
+
             }
         }
         
         public static bool Delete(int countryID)
         {
-            if (countryID <= 0)
-                return false;
-
-            if (!CountryService.IsCountryExist(countryID))
+            if (countryID < 1 || !CountryService.IsExists(countryID))
                 return false;
 
             try
             {
-                return CountryService.DeleteCountry(countryID);
+                return CountryService.Delete(countryID);
             }
             catch (Exception ex)
             {

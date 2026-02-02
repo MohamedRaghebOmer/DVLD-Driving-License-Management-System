@@ -1,4 +1,4 @@
-﻿namespace DVLD.Data
+﻿namespace DVLD.Data.Settings
 {
     internal static class DataSettings
     {
