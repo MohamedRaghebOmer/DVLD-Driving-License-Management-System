@@ -1,4 +1,4 @@
-﻿using System;
+﻿using DVLD.Core.Exceptions;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("DVLD.Data")]
@@ -19,7 +19,7 @@ namespace DVLD.Core.DTOs.Entities
                 if (value > 0 || value == -1)
                     _countryID = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(CountryID), "Invalid CountryID.");
+                    throw new ValidationException("Invalid CountryID.");
             }
         }
 
@@ -29,13 +29,13 @@ namespace DVLD.Core.DTOs.Entities
 
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(CountryName), "Country name cannot be null.");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ValidationException("Country name cannot be empty.");
 
                 if (value.Length >= 3)
                     _countryName = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(CountryName), "Invalid CountryName.");
+                    throw new ValidationException("Invalid CountryName.");
             }
         }
 

@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using DVLD.Core.DTOs.Enums;
-
-[assembly: InternalsVisibleTo("DVLD.Data")]
+using DVLD.Core.Exceptions;
 
 namespace DVLD.Core.DTOs.Entities
 {
     public class Person
     {
+        private const int MaxNameLength = 15;
+
         private int _personID;
         private string _nationalNo;
         private string _firstName;
@@ -28,10 +28,10 @@ namespace DVLD.Core.DTOs.Entities
 
             internal set
             {
-                if (value > 0 || value == -1)
+                if (value > 0)
                     _personID = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(PersonID), "Invalid PersonID");
+                    throw new ValidationException("Invalid PersonID");
             }
         }
 
@@ -41,13 +41,13 @@ namespace DVLD.Core.DTOs.Entities
             
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(NationalNumber), "National number cannot be null.");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ValidationException("National number cannot be empty.");
 
                 if (value.Length > 5 && value.Length < 20)
                     _nationalNo = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(NationalNumber), "Invalid national number length.");
+                    throw new ValidationException("Invalid national number length.");
             }
         }
 
@@ -57,14 +57,14 @@ namespace DVLD.Core.DTOs.Entities
 
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(FirstName), "First name cannot be null.");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ValidationException("First name cannot be empty.");
 
                 // Not null and less than 15 characters
-                if (value.Length > 1 && value.Length < 15)
+                if (value.Length > 1 && value.Length <= MaxNameLength)
                     _firstName = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(FirstName), "First name length must be less than 15 characters.");
+                    throw new ValidationException($"First name must be between 2 and {MaxNameLength} characters.");
             }
         }
 
@@ -74,14 +74,14 @@ namespace DVLD.Core.DTOs.Entities
 
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(SecondName), "Second name cannot be null.");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ValidationException("Second name cannot be empty.");
 
                 // Not null and less than 15 characters
-                if (value.Length > 1 && value.Length < 15)
+                if (value.Length > 1 && value.Length <= MaxNameLength)
                     _secondName = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(SecondName), "Second name lenght must be less than 15 characters.");
+                    throw new ValidationException($"Second name must be between 2 and {MaxNameLength} characters");
             }
         }
 
@@ -92,12 +92,13 @@ namespace DVLD.Core.DTOs.Entities
             set
             {
                 // Nullable field, but less than 15 characters
-                string val = value ?? string.Empty;
-                if (val.Length < 15)
-                    _thirdName = val;
-                else
-                    throw new ArgumentOutOfRangeException(nameof(ThirdName), "Third name lenght must be less than 15 characters.");
+                if (string.IsNullOrWhiteSpace(value))
+                    value = string.Empty;
 
+                if (value.Length <= MaxNameLength)
+                    _thirdName = value;
+                else
+                    throw new ValidationException($"Third name length cannot exceed {MaxNameLength} characters.");
             }
         }
 
@@ -107,14 +108,14 @@ namespace DVLD.Core.DTOs.Entities
 
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(LastName), "Last name cannot be null.");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ValidationException("Last name cannot be empty.");
 
                 // Not null and less than 15 characters
-                if (value.Length > 1 && value.Length < 15)
+                if (value.Length > 1 && value.Length <= MaxNameLength)
                     _lastName = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(LastName), "Last name lenght must be less than 15 characters.");
+                    throw new ValidationException($"Last name length must be between 2 and {MaxNameLength} characters.");
 
             }
         }
@@ -126,16 +127,17 @@ namespace DVLD.Core.DTOs.Entities
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException(nameof(DateOfBirth), "Date of birth cannot be null.");
+                    throw new ValidationException("Date of birth cannot be empty.");
 
                 DateTime minDate = DateTime.Now.AddYears(-100);
                 DateTime maxDate = DateTime.Now.AddYears(-18);
 
-                // Must be older than 18 years old and younger than 100 years old
-                if ((value >= minDate && value <= maxDate) || value == DateTime.MinValue)
+                // Must be between 18 and 100 years old
+                if ((value >= minDate && value <= maxDate))
                     _dateOfBirth = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(DateOfBirth), "Person must be between 18 and 100 years old.");
+                    throw new ValidationException($"Person must be between 18 and 100 years old.");
+
             }
         }
         
@@ -151,13 +153,13 @@ namespace DVLD.Core.DTOs.Entities
 
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(Address), "Address cannot be null.");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ValidationException("Address cannot be empty.");
 
                 if (value.Length > 5)
                     _address = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(Address), "Address must be more than 5 characters.");
+                    throw new ValidationException("Address must be more than 5 characters.");
             }
         }
 
@@ -167,13 +169,13 @@ namespace DVLD.Core.DTOs.Entities
 
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(Phone), "Phone cannot be null.");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ValidationException("Phone cannot be empty.");
 
                 if (value.Length >= 7 && value.Length <= 20)
                     _phone = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(Phone), "Invalid phone length.");
+                    throw new ValidationException("Invalid phone length.");
             }
         }
 
@@ -184,15 +186,15 @@ namespace DVLD.Core.DTOs.Entities
             set
             {
                 // Nullable field, but less than 50 characters
-                if (value == null)
+                if (string.IsNullOrWhiteSpace(value))
                     value = string.Empty;
                 else if (!value.Contains("@") || !value.Contains("."))
-                    throw new ArgumentException("Invalid email format.", nameof(Email));
+                    throw new ValidationException("Invalid email format.");
                 
                 if (value.Length < 50)
                     _email = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(Email), "Invalid email length.");
+                    throw new ValidationException("Invalid email length.");
             }
         }
 
@@ -202,10 +204,10 @@ namespace DVLD.Core.DTOs.Entities
             
             set
             {
-                if (value > 0 || value == -1)
+                if (value > 0)
                     _countryID = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(NationalityCountryID), "Invalid nationality country ID");
+                    throw new ValidationException("Invalid country ID.");
             }
 
         }
@@ -218,10 +220,10 @@ namespace DVLD.Core.DTOs.Entities
             {
                 // Nullable field, but less than 100 characters
                 string val = value ?? string.Empty;
-                if (val.Length < 100)
+                if (val.Length < 250)
                     _imagePath = val;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(ImagePath), "Image path is too long.");
+                    throw new ValidationException("Image path is too long.");
             } 
         }
 
@@ -234,7 +236,7 @@ namespace DVLD.Core.DTOs.Entities
             this._secondName = string.Empty;
             this._thirdName = string.Empty;
             this._lastName = string.Empty;
-            this._dateOfBirth = DateTime.MinValue;
+            this._dateOfBirth = new DateTime(1, 1, 1);
             this._gender = Gender.Unknown;
             this._address = string.Empty;
             this._phone = string.Empty;
