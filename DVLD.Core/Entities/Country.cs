@@ -19,7 +19,7 @@ namespace DVLD.Core.DTOs.Entities
                 if (value > 0 || value == -1)
                     _countryID = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(_countryID), "Invalid CountryID.");
+                    throw new ArgumentOutOfRangeException(nameof(CountryID), "Invalid CountryID.");
             }
         }
 
@@ -29,10 +29,13 @@ namespace DVLD.Core.DTOs.Entities
 
             set
             {
+                if (value == null)
+                    throw new ArgumentNullException(nameof(CountryName), "Country name cannot be null.");
+
                 if (value.Length >= 3)
                     _countryName = value;
                 else
-                    throw new ArgumentOutOfRangeException(nameof(_countryName), "Invalid CountryName.");
+                    throw new ArgumentOutOfRangeException(nameof(CountryName), "Invalid CountryName.");
             }
         }
 
