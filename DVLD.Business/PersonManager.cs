@@ -4,7 +4,6 @@ using DVLD.Data;
 using DVLD.Core.DTOs.Entities;
 using DVLD.Core.Logging;
 using DVLD.Business.EntityValidators;
-using DVLD.Core.Exceptions;
 
 namespace DVLD.Business
 {
@@ -62,7 +61,7 @@ namespace DVLD.Business
         public static Person GetPerson(string nationalNumber)
         {
             if (string.IsNullOrWhiteSpace(nationalNumber))
-                throw new BusinessException("Please write a valid national number and try again.");
+                return null;
 
             try
             {
@@ -90,8 +89,8 @@ namespace DVLD.Business
 
         public static bool Delete(int personID)
         {
-            if (personID < 1)
-                throw new BusinessException("Person ID must be positive.");
+            if (personID < 1 || !PersonService.IsExists(personID))
+                return false;
 
             try
             {
@@ -107,8 +106,8 @@ namespace DVLD.Business
 
         public static bool Delete(string nationalNumber)
         {
-            if (string.IsNullOrWhiteSpace(nationalNumber))
-                throw new BusinessException("please enter a valid national number and try again.");
+            if (string.IsNullOrWhiteSpace(nationalNumber) || !PersonService.IsExists(nationalNumber))
+                return false;
 
             try
             {
@@ -118,9 +117,7 @@ namespace DVLD.Business
             {
                 AppLogger.LogError($"BLL: Error while deleting person with national number = {nationalNumber}.");
                 throw new Exception("We encountered a technical issue. Please try again later.", ex);
-
             }
-
         }
     }
 }

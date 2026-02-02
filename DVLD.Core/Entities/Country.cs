@@ -16,7 +16,7 @@ namespace DVLD.Core.DTOs.Entities
             
             internal set
             {
-                if (value > 0 || value == -1)
+                if (value > 0)
                     _countryID = value;
                 else
                     throw new ValidationException("Invalid CountryID.");
