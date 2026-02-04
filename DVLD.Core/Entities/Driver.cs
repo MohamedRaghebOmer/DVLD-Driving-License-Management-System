@@ -9,7 +9,6 @@ namespace DVLD.Core.DTOs.Entities
         private int _personID;
         private int _createdByUserID;
         private DateTime _createdDate;
-        private DateTime? _deletedDate;
 
 
         public int DriverID
@@ -64,25 +63,6 @@ namespace DVLD.Core.DTOs.Entities
             }
         }
 
-        public DateTime? DeletedDate
-        {
-            get => _deletedDate;
-
-            internal set
-            {
-                if (value == null)
-                {
-                    _deletedDate = null;
-                    return;
-                }
-
-                if (value <= DateTime.Now)
-                    _deletedDate = value;
-                else
-                    throw new ValidationException("Deleted date can't be in the future.");
-            }
-        }
-
 
         public Driver()
         {
@@ -90,7 +70,6 @@ namespace DVLD.Core.DTOs.Entities
             this._personID = -1;
             this._createdByUserID = -1;
             this._createdDate = new DateTime(1900, 1, 1);
-            this._deletedDate = null;
         }
 
         public Driver(int personID, int createdByUserID) : this()
@@ -99,16 +78,14 @@ namespace DVLD.Core.DTOs.Entities
             this.PersonID = personID;
             this.CreatedByUserID = createdByUserID;
             // this._dateCreated = new DateTime(1, 1, 1);
-            // this._deletedDate = null;
         }
 
-        internal Driver(int driverID, int personID, int createdByUserID, DateTime createdDate, DateTime? deletedDate)
+        internal Driver(int driverID, int personID, int createdByUserID, DateTime createdDate)
         {
             this.DriverID = driverID;
             this.PersonID = personID;
             this.CreatedByUserID = createdByUserID;
             this.CreatedDate = createdDate;
-            this.DeletedDate = deletedDate;
         }
     }
 }

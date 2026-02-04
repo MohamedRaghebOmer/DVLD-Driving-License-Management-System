@@ -22,9 +22,6 @@ namespace DVLD.Core.Validators
 
             if (driver.CreatedDate > DateTime.Now)
                 throw new ValidationException("Creation date can't be in the future.");
-
-            if (driver.DeletedDate != null && driver.DeletedDate > DateTime.Now)
-                throw new ValidationException("Deletion date can't be in the future.");
         }
     }
 }
