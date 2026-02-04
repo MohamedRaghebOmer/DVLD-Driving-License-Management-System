@@ -42,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CountryManager.cs" />
+    <Compile Include="DriverManager.cs" />
+    <Compile Include="EntityValidators\DriverValidator.cs" />
     <Compile Include="EntityValidators\UserValidator.cs" />
     <Compile Include="PersonManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
