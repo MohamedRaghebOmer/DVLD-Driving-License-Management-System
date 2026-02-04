@@ -11,7 +11,6 @@ namespace DVLD.Core.DTOs.Entities
         private string _username;
         private string _password;
         private bool _isActive;
-        private DateTime? _deletedDate;
 
         public int UserID
         {
@@ -66,26 +65,7 @@ namespace DVLD.Core.DTOs.Entities
             get => _isActive;
             set => _isActive = value;
         }        
-       
-        public DateTime? DeletedDate
-        {
-            get => _deletedDate;
-
-            internal set
-            {
-                if (value == null)
-                {
-                    _deletedDate = null;
-                    return;
-                }
-
-               if (value <= DateTime.Now)
-                    _deletedDate = value;
-                else
-                    throw new ValidationException("Deleted date can't be in the future.");
-            }
-        }
-
+      
 
         public User()
         {
@@ -94,7 +74,6 @@ namespace DVLD.Core.DTOs.Entities
             this._username = string.Empty;
             this._password = string.Empty;
             this._isActive = false;
-            this._deletedDate = null;
         }
 
         public User(int personID, string username, string password, bool isActive) : this()
@@ -104,17 +83,15 @@ namespace DVLD.Core.DTOs.Entities
             this.Username = username;
             this.Password = password;
             this.IsActive = isActive;
-            // this._deletedDate = null;
         }
 
-        internal User(int userID, int personID, string username, string password, bool isActive, DateTime? DeletedDate) : this()
+        internal User(int userID, int personID, string username, string password, bool isActive) : this()
         {
             this.UserID = userID;
             this.PersonID = personID;
             this.Username = username;
             this.Password = password;
             this.IsActive = isActive;
-            this.DeletedDate = DeletedDate;
         }
     }
 }

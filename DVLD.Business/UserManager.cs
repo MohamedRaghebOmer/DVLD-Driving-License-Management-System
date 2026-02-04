@@ -4,7 +4,6 @@ using DVLD.Data;
 using DVLD.Core.DTOs.Entities;
 using DVLD.Core.Logging;
 using DVLD.Business.EntityValidators;
-using DVLD.Core.Exceptions;
 
 namespace DVLD.Business
 {
@@ -141,7 +140,7 @@ namespace DVLD.Business
 
         public static bool DeleteByUsername(string username)
         {
-            if (string.IsNullOrWhiteSpace(username) || !UserService.IsUsernameExist(username))
+            if (string.IsNullOrWhiteSpace(username) || !UserService.IsUsernameExists(username))
                 return false;
 
             try

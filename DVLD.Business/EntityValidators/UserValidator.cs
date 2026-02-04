@@ -13,7 +13,7 @@ namespace DVLD.Business.EntityValidators
             if (UserService.IsPersonUsed(user.PersonID))
                 throw new ValidationException("The person is already associated with another user.");
 
-            if (UserService.IsUsernameExist(user.Username))
+            if (UserService.IsUsernameExists(user.Username))
                 throw new ValidationException("The username is already taken.");
         }
 
@@ -26,9 +26,6 @@ namespace DVLD.Business.EntityValidators
 
             if (UserService.IsUsernameUsedByOther(user.UserID, user.Username))
                 throw new ValidationException("The username is already taken by another user.");
-
-            if (user.DeletedDate == null)
-                throw new ValidationException("Can't update this username because it has been deleted.");
         }
     }
 }

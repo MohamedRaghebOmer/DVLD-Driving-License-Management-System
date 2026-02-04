@@ -105,7 +105,7 @@ namespace DVLD.Data
         {
             string query = @"SELECT 1
                             FROM Countries
-                            WHERE CountryName = @countryName;";
+                            WHERE LOWER(CountryName) = LOWER(@countryName);";
 
             try
             {
@@ -130,7 +130,7 @@ namespace DVLD.Data
         {
             string query = @"SELECT 1 
                             FROM Countries 
-                            WHERE CountryName = @countryName AND CountryID != @excludedId;";
+                            WHERE LOEWR(CountryName) = LOWER(@countryName) AND CountryID != @excludedId;";
 
             try
             {

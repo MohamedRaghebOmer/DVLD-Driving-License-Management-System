@@ -73,8 +73,7 @@ namespace DVLD.Data
                                 Convert.ToInt32(reader["DriverID"]),
                                 Convert.ToInt32(reader["PersonID"]),
                                 Convert.ToInt32(reader["CreatedByUserID"]),
-                                Convert.ToDateTime(reader["CreatedDate"]),
-                                Convert.ToDateTime(reader["DeletedDate"])
+                                Convert.ToDateTime(reader["CreatedDate"])
                             );
                         }
                         
@@ -110,8 +109,7 @@ namespace DVLD.Data
                                 Convert.ToInt32(reader["DriverID"]),
                                 Convert.ToInt32(reader["PersonID"]),
                                 Convert.ToInt32(reader["CreatedByUserID"]),
-                                Convert.ToDateTime(reader["CreatedDate"]),
-                                Convert.ToDateTime(reader["DeletedDate"])
+                                Convert.ToDateTime(reader["CreatedDate"])
                             );
                         }
                         return null;
@@ -233,15 +231,13 @@ namespace DVLD.Data
         // --------------------Delete-----------------------------
         public static bool DeleteByDriverID(int driverID)
         {
-            string query = @"UPDATE Drivers SET DeletedDate = @deletedDate WHERE DriverID = @dirverID;";
+            string query = @"DELETE FROM Drivers WHERE DriverID = @driverID;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    DateTime deletedDate = DateTime.Now;
-                    command.Parameters.AddWithValue("@deletedDate", deletedDate);
                     command.Parameters.AddWithValue("@driverID", driverID);
                     
                     connection.Open();
@@ -250,22 +246,20 @@ namespace DVLD.Data
             }
             catch (Exception ex)
             {
-                AppLogger.LogError("DAL: Error while changing DeletedDate field in Drivers to DateTime.Now", ex);
+                AppLogger.LogError($"DAL: Error while deleting form Drivers where driver id = {driverID}", ex);
                 throw;
             }
         }
 
         public static bool DeleteByPersonID(int personID)
         {
-            string query = @"UPDATE Drivers SET DeletedDate = @deletedDate WHERE PersonID = @personID;";
+            string query = @"DELETE FROM Drivers WHERE PersonID = @personID;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    DateTime deletedDate = DateTime.Now;
-                    command.Parameters.AddWithValue("@deletedDate", deletedDate);
                     command.Parameters.AddWithValue("@personID", personID);
                     connection.Open();
                     
@@ -274,7 +268,7 @@ namespace DVLD.Data
             }
             catch (Exception ex)
             {
-                AppLogger.LogError("DAL: Error while deleting from Drivers.", ex);
+                AppLogger.LogError($"DAL: Error while deleting from Drivers where person id = {personID}.", ex);
                 throw;
             }
         }
