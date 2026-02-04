@@ -7,10 +7,10 @@ using System.Data;
 
 namespace DVLD.Data
 {
-    public static class CountryService
+    public static class CountryData
     {
         // -------------------------Create----------------------
-        public static bool AddNew(Country country)
+        public static int AddNew(Country country)
         {
             string query = @"INSERT INTO Countries(CountryName)
                             VALUES(@countryName)
@@ -28,17 +28,14 @@ namespace DVLD.Data
                     object result = command.ExecuteScalar();
 
                     if (result != null && int.TryParse(result.ToString(), out int insertedID))
-                    {
-                        country.CountryID = insertedID;
-                        return true;
-                    }
+                        return insertedID;
 
-                    return false;
+                    return -1;
                 }
             }
             catch(Exception ex)
             {
-                AppLogger.LogError("DAL: Error while inserting into Countries table.", ex);
+                AppLogger.LogError("DAL: Error while inserting into Countries.", ex);
                 throw;
             }
         }

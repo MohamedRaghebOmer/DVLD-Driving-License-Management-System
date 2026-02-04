@@ -7,9 +7,9 @@ using DVLD.Business.EntityValidators;
 
 namespace DVLD.Business
 {
-    public static class TestTypeManager
+    public static class TestTypeBusiness
     {
-        public static bool Save(TestType testType)
+        public static TestType Save(TestType testType)
         {
             // Add new test type
             if (testType.TestTypeID == -1)
@@ -18,7 +18,12 @@ namespace DVLD.Business
 
                 try
                 {
-                    return TestTypeService.AddNewTestType(testType);
+                    int newTestTypeID = TestTypeData.AddNew(testType);
+
+                    if (newTestTypeID != -1)
+                        return TestTypeData.Get(newTestTypeID);
+                    
+                    return null;
                 }
                 catch(Exception ex)
                 {
@@ -32,7 +37,9 @@ namespace DVLD.Business
 
                 try
                 {
-                    return TestTypeService.UpdateTestType(testType);
+                    if (TestTypeData.Update(testType))
+                        return TestTypeData.Get(testType.TestTypeID);
+                    return null;
                 }
                 catch (Exception ex)
                 {
@@ -50,7 +57,7 @@ namespace DVLD.Business
 
             try
             {
-                return TestTypeService.GetTestTypeByID(testTypeID);
+                return TestTypeData.Get(testTypeID);
             }
             catch (Exception ex)
             {
@@ -67,7 +74,7 @@ namespace DVLD.Business
 
             try
             {
-                return TestTypeService.GetTestTypeByTitle(testTypeTitle);
+                return TestTypeData.Get(testTypeTitle);
             }
             catch (Exception ex)
             {
@@ -81,7 +88,7 @@ namespace DVLD.Business
         {
             try
             {
-                return TestTypeService.GetAllTestTypes();
+                return TestTypeData.GetAll();
             }
             catch (Exception ex)
             {
@@ -98,7 +105,7 @@ namespace DVLD.Business
 
             try
             {
-                return TestTypeService.DeleteTestType(testTypeID);
+                return TestTypeData.Delete(testTypeID);
             }
             catch (Exception ex)
             {
@@ -115,7 +122,7 @@ namespace DVLD.Business
 
             try
             {
-                return TestTypeService.DeleteTestType(testTypeTitle);
+                return TestTypeData.Delete(testTypeTitle);
             }
             catch (Exception ex)
             {

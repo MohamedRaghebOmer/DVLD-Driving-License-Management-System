@@ -1,16 +1,16 @@
 ﻿using System;
+using System.Data;
 using System.Data.SqlClient;
 using DVLD.Data.Settings;
-using DVLD.Core.DTOs.Entities;
 using DVLD.Core.Logging;
-using System.Data;
+using DVLD.Core.DTOs.Entities;
 
 namespace DVLD.Data
 {
-    public static class TestTypeService
+    public static class TestTypeData
     {
         // ---------------------------Create----------------------------
-        public static bool AddNewTestType(TestType testType)
+        public static int AddNew(TestType testType)
         {
             string qurey = @"INSERT INTO TestTypes(TestTypeTitle, TestTypeDescription, TestTypeFees)
                             VALUES (@title, @description, @fees); SELECT SCOPE_IDENTITY();";
@@ -28,12 +28,9 @@ namespace DVLD.Data
                     object result = command.ExecuteScalar();
 
                     if (result != null && int.TryParse(result.ToString(), out int insertedID))
-                    {
-                        testType.TestTypeID = insertedID;
-                        return insertedID != -1;
-                    }
+                        return insertedID;
 
-                    return false;
+                    return -1;
                 }
             }
             catch (Exception ex)
@@ -45,7 +42,7 @@ namespace DVLD.Data
 
 
         // ---------------------------Read------------------------------
-        public static TestType GetTestTypeByID(int testTypeID)
+        public static TestType Get(int testTypeID)
         {
             string query = "SELECT * FROM TestTypes WHERE TestTypeID = @id;";
 
@@ -62,17 +59,18 @@ namespace DVLD.Data
                         if (reader.Read())
                         {
                             TestType testType = new TestType
-                            {
-                                TestTypeID = reader.GetInt32(0),
-                                TestTypeTitle = reader.GetString(1),
-                                TestTypeDescription = reader.GetString(2),
-                                TestTypeFees = reader.GetDecimal(3)
-                            };
+                            (
+                                Convert.ToInt32(reader["TestTypeID"]),
+                                reader["TestTypeTitle"].ToString(),
+                                reader["TestTypeDescription"] == DBNull.Value ? string.Empty : reader["TestTypeDescription"].ToString(),
+                                Convert.ToDecimal(reader["TestTypeFees"])
+                            );
 
                             return testType;
                         }
                     }
                 }
+
                 return null;
             }
             catch (Exception ex)
@@ -82,7 +80,7 @@ namespace DVLD.Data
             }
         }
 
-        public static TestType GetTestTypeByTitle(string testTypeTitle)
+        public static TestType Get(string testTypeTitle)
         {
             string query = "SELECT * FORM TestTypes WHERE LOWER(TestTypeTitle) = LOWER(@title);";
 
@@ -99,12 +97,12 @@ namespace DVLD.Data
                         if (reader.Read())
                         {
                             return new TestType
-                            {
-                                TestTypeID = Convert.ToInt32(reader["TestTypeID"]),
-                                TestTypeTitle = reader["TestTypeTitle"].ToString(),
-                                TestTypeDescription = reader["TestTypeDescription"].ToString(),
-                                TestTypeFees = Convert.ToDecimal(reader["TestTypeFees"])
-                            };
+                            (
+                                Convert.ToInt32(reader["TestTypeID"]),
+                                reader["TestTypeTitle"].ToString(),
+                                reader["TestTypeDescription"] == DBNull.Value ? string.Empty : reader["TestTypeDescription"].ToString(),
+                                Convert.ToDecimal(reader["TestTypeFees"])
+                            );
                         }
 
                         return null;
@@ -118,7 +116,7 @@ namespace DVLD.Data
             }
         }
 
-        public static DataTable GetAllTestTypes()
+        public static DataTable GetAll()
         {
             string query = "SELECT * FROM TestTypes;";
 
@@ -149,7 +147,7 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsTestTypeExists(int testTypeID)
+        public static bool IsExists(int testTypeID)
         {
             string query = "SELECT 1 FROM TestTypes WHERE TestTypeID = @id;";
 
@@ -171,7 +169,7 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsTestTypeExists(string testTypeTitle)
+        public static bool IsExists(string testTypeTitle)
         {
             string query = "SELECT 1 FROM TestTypes WHERE LOWER(TestTypeTitle) = LOWER(@title);";
 
@@ -193,7 +191,7 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsTestTypeTitleUsed(string testTypeTitle, int excludedTestTypeID)
+        public static bool IsTitleUsed(string testTypeTitle, int excludedTestTypeID)
         {
             string query = "SELECT 1 FROM TestTypes WHERE TestTypeTitle = @title AND TestTypeID != @id;";
             
@@ -219,7 +217,7 @@ namespace DVLD.Data
 
 
         // --------------------------Update-----------------------------
-        public static bool UpdateTestType(TestType testType)
+        public static bool Update(TestType testType)
         {
             string query = @"UPDATE TestTypes SET TestTypeTitle = @title, TestTypeDescription = @descripition, 
                             TestTypeFees = @fees WHERE TestTypeID = @id;";
@@ -249,7 +247,7 @@ namespace DVLD.Data
 
 
         // --------------------------Delete----------------------------
-        public static bool DeleteTestType(int testTypeID)
+        public static bool Delete(int testTypeID)
         {
             string query = "DELETE FROM TestTypes WHERE TestTypeID = @id;";
 
@@ -271,7 +269,7 @@ namespace DVLD.Data
             }
         }
 
-        public static bool DeleteTestType(string testTypeTitle)
+        public static bool Delete(string testTypeTitle)
         {
             string query = "DELETE FROM TestTypes WHERE TestTypeTitle = @testTypeTitle;";
 

@@ -13,7 +13,7 @@ namespace DVLD.Core.DTOs.Entities
         {
             get => _testTypeID;
 
-            internal set
+            private set
             {
                 if (value < 1)
                     throw new ValidationException("Test type id can't be negative.");

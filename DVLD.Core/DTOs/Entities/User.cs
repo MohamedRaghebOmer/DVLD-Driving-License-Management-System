@@ -16,11 +16,11 @@ namespace DVLD.Core.DTOs.Entities
         {
             get => _userID;
 
-            internal set
+            private set
             {
                 if (value <= 0)
-                    throw new ValidationException("UserID can'te be negative.");
-                
+                    throw new ValidationException("UserID can't be negative.");
+
                 _userID = value;
             }
         }

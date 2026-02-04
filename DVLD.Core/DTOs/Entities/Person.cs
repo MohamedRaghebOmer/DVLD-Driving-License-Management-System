@@ -24,9 +24,9 @@ namespace DVLD.Core.DTOs.Entities
 
         public int PersonID
         {
-            get => _personID; 
+            get => _personID;
 
-            internal set
+            private set
             {
                 if (value > 0)
                     _personID = value;

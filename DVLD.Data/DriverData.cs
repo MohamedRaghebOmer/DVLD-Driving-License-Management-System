@@ -7,10 +7,10 @@ using DVLD.Core.DTOs.Entities;
 
 namespace DVLD.Data
 {
-    public static class DriverService
+    public static class DriverData
     {
         // -----------------------Create-------------------------
-        public static bool AddNewDriver(Driver driver)
+        public static int AddNew(Driver driver)
         {
             string query = @"INSERT INTO Drivers (PersonID, CreatedByUserID, CreatedDate)
                     VALUES (@PersonID, @CreatedByUserID, @CreatedDate);
@@ -34,13 +34,9 @@ namespace DVLD.Data
                     object result = command.ExecuteScalar();
 
                     if (result != null && int.TryParse(result.ToString(), out int insertedID))
-                    {
-                        driver.DriverID = insertedID;
-                        driver.CreatedDate = smallDateTimeValue;
-                        return true;
-                    }
-
-                    return false;
+                        return insertedID;
+                    else
+                        return -1;
                 }
             }
             catch (Exception ex)
@@ -52,7 +48,7 @@ namespace DVLD.Data
 
 
         // ----------------------Read----------------------------
-        public static Driver GetDriverByID(int driverID)
+        public static Driver GetByID(int driverID)
         {
             string query = @"SELECT * FROM Drivers WHERE DriverID = @driverID;";
 
@@ -88,7 +84,7 @@ namespace DVLD.Data
             }
         }
 
-        public static Driver GetDriverByPersonID(int personID)
+        public static Driver GetByPersonID(int personID)
         {
             string query = "SELECT * FROM Drivers WHERE PerosnID = @personID;";
 
@@ -168,7 +164,7 @@ namespace DVLD.Data
             }
         }
 
-        public static DataTable GetAllDrivers()
+        public static DataTable GetAll()
         {
             string query = "SELECT * FROM Drivers;";
 

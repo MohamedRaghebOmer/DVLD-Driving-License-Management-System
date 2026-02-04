@@ -15,12 +15,12 @@ namespace DVLD.Core.DTOs.Entities
         {
             get => _driverID;
 
-            internal set
+            private set
             {
                 if (value > 0)
                     _driverID = value;
                 else
-                    throw new ValidationException("Driver ID must be a positvie integer.");
+                    throw new ValidationException("Driver ID must be a positive integer.");
             }
         }
 
@@ -54,7 +54,7 @@ namespace DVLD.Core.DTOs.Entities
         {
             get => _createdDate;
 
-            internal set
+            private set
             {
                 if (value <= DateTime.Now)
                     _createdDate = value;

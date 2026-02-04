@@ -7,9 +7,9 @@ using DVLD.Business.EntityValidators;
 
 namespace DVLD.Business
 {
-    public static class PersonManager
+    public static class PersonBusiness
     {
-        public static bool Save(Person person)
+        public static Person Save(Person person)
         {
             // Add new person
             if (person.PersonID == -1)
@@ -18,7 +18,11 @@ namespace DVLD.Business
 
                 try
                 {
-                    return PersonService.AddNew(person);
+                    int newPersonID = PersonData.AddNew(person);
+                    
+                    if (newPersonID != -1)
+                        return PersonData.Get(newPersonID);
+                    return null;
                 }
                 catch(Exception ex)
                 {
@@ -32,7 +36,10 @@ namespace DVLD.Business
                 
                 try
                 {
-                    return PersonService.Update(person);
+                    if (PersonData.Update(person))
+                        return PersonData.Get(person.PersonID);
+                    
+                    return null;
                 }
                 catch(Exception ex)
                 {
@@ -49,7 +56,7 @@ namespace DVLD.Business
 
             try
             {
-                return PersonService.Get(personID);
+                return PersonData.Get(personID);
             }
             catch(Exception ex)
             {
@@ -65,7 +72,7 @@ namespace DVLD.Business
 
             try
             {
-                return PersonService.Get(nationalNumber);
+                return PersonData.Get(nationalNumber);
             }
             catch (Exception ex)
             {
@@ -78,7 +85,7 @@ namespace DVLD.Business
         {
             try
             {
-                return PersonService.GetAll();
+                return PersonData.GetAll();
             }
             catch(Exception ex)
             {
@@ -89,12 +96,12 @@ namespace DVLD.Business
 
         public static bool Delete(int personID)
         {
-            if (personID < 1 || !PersonService.IsExists(personID))
+            if (personID < 1 || !PersonData.IsExists(personID))
                 return false;
 
             try
             {
-                return PersonService.Delete(personID);
+                return PersonData.Delete(personID);
             }
             catch(Exception ex)
             {
@@ -106,12 +113,12 @@ namespace DVLD.Business
 
         public static bool Delete(string nationalNumber)
         {
-            if (string.IsNullOrWhiteSpace(nationalNumber) || !PersonService.IsExists(nationalNumber))
+            if (string.IsNullOrWhiteSpace(nationalNumber) || !PersonData.IsExists(nationalNumber))
                 return false;
 
             try
             {
-                return PersonService.Delete(nationalNumber);
+                return PersonData.Delete(nationalNumber);
             }
             catch (Exception ex)
             {

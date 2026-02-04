@@ -41,17 +41,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CountryManager.cs" />
-    <Compile Include="DriverManager.cs" />
+    <Compile Include="CountryBusiness.cs" />
+    <Compile Include="DriverBusiness.cs" />
     <Compile Include="EntityValidators\DriverValidator.cs" />
     <Compile Include="EntityValidators\TestTypeValidator.cs" />
     <Compile Include="EntityValidators\UserValidator.cs" />
-    <Compile Include="PersonManager.cs" />
+    <Compile Include="PersonBusiness.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EntityValidators\CountryValidator.cs" />
     <Compile Include="EntityValidators\PersonValidator.cs" />
-    <Compile Include="TestTypeManager.cs" />
-    <Compile Include="UserManager.cs" />
+    <Compile Include="TestTypeBusiness.cs" />
+    <Compile Include="UserBusiness.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DVLD.Core\DVLD.Core.csproj">
