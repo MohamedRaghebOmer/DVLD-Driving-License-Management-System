@@ -38,7 +38,7 @@ namespace DVLD.Data
             }
             catch(Exception ex)
             {
-                Core.Logging.AppLogger.LogError("DAL: Error while inserting into Countries table.", ex);
+                AppLogger.LogError("DAL: Error while inserting into Countries table.", ex);
                 throw;
             }
         }

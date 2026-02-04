@@ -26,6 +26,9 @@ namespace DVLD.Business.EntityValidators
 
             if (UserService.IsUsernameUsedByOther(user.UserID, user.Username))
                 throw new ValidationException("The username is already taken by another user.");
+
+            if (user.DeletedDate == null)
+                throw new ValidationException("Can't update this username because it has been deleted.");
         }
     }
 }

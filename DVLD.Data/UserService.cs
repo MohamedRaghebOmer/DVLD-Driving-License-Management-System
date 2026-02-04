@@ -63,17 +63,26 @@ namespace DVLD.Data
                     {
                         if (reader.Read())
                         {
+                            DateTime? dt = new DateTime();
+
+                            if (reader["DeletedDate"] == DBNull.Value)
+                                dt = null;
+                            else
+                                dt = Convert.ToDateTime(reader["DeletedDate"]);
+
                             return new User
                             {
                                 UserID = Convert.ToInt32(reader["UserID"]),
                                 PersonID = Convert.ToInt32(reader["PersonID"]),
                                 Username = reader["Username"].ToString(),
                                 Password = reader["Password"].ToString(),
-                                IsActive = Convert.ToBoolean(reader["IsActive"])
+                                IsActive = Convert.ToBoolean(reader["IsActive"]),
+                                DeletedDate = dt
                             };
                         }
                     }
                 }
+
                 return null;
             }
             catch (Exception ex)
@@ -98,13 +107,21 @@ namespace DVLD.Data
                     {
                         if (reader.Read())
                         {
+                            DateTime? dt = new DateTime();
+
+                            if (reader["DeletedDate"] == DBNull.Value)
+                                dt = null;
+                            else
+                                dt = Convert.ToDateTime(reader["DeletedDate"]);
+
                             return new User
                             {
                                 UserID = Convert.ToInt32(reader["UserID"]),
                                 PersonID = Convert.ToInt32(reader["PersonID"]),
                                 Username = reader["Username"].ToString(),
                                 Password = reader["Password"].ToString(),
-                                IsActive = Convert.ToBoolean(reader["IsActive"])
+                                IsActive = Convert.ToBoolean(reader["IsActive"]),
+                                DeletedDate = dt
                             };
                         }
                     }
@@ -134,13 +151,21 @@ namespace DVLD.Data
                     {
                         if (reader.Read())
                         {
+                            DateTime? dt = new DateTime();
+
+                            if (reader["DeletedDate"] == DBNull.Value)
+                                dt = null;
+                            else
+                                dt = Convert.ToDateTime(reader["DeletedDate"]);
+
                             return new User
                             {
                                 UserID = Convert.ToInt32(reader["UserID"]),
                                 PersonID = Convert.ToInt32(reader["PersonID"]),
                                 Username = reader["Username"].ToString(),
                                 Password = reader["Password"].ToString(),
-                                IsActive = Convert.ToBoolean(reader["IsActive"])
+                                IsActive = Convert.ToBoolean(reader["IsActive"]),
+                                DeletedDate = dt
                             };
                         }
 
@@ -264,6 +289,52 @@ namespace DVLD.Data
             }
         }
 
+        public static bool IsActiveUser(int userID)
+        {
+            string query = @"SELECT 1 FROM Users WHERE UserID = @userID AND IsActive = 1;";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@userID", userID);
+                    connection.Open();
+
+                    return command.ExecuteScalar() != null;
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError("DAL: Error while checking user activation status.", ex);
+                throw;
+            }
+
+        }
+        
+        public static bool IsUserDeleted(int userID)
+        {
+            string query = @"SELECT 1 FROM Users WHERE UserID = @userID AND DeletedDate != NULL;";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@userID", userID);
+                    connection.Open();
+
+                    return command.ExecuteScalar() != null;
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError("DAL: Error while checking user deletion status.", ex);
+                throw;
+            }
+
+        }
+        
         public static DataTable GetAll()
         {
             string query = "SELECT * FROM Users";
@@ -333,35 +404,43 @@ namespace DVLD.Data
         // ----------------------------Delete----------------------------
         public static bool DeleteByUserID(int userID)
         {
-            string query = "DELETE FROM Users WHERE UserID = @UserID";
+            string query = @"UPDATE Users 
+                            SET DeletedDate = @DeletedDate
+                            WHERE UserID = @userID";
             
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@UserID", userID);
+                    DateTime DeletedDate = DateTime.Now;
+
+                    command.Parameters.AddWithValue("@DeletedDate", DeletedDate);
+                    command.Parameters.AddWithValue("@userID", userID);
+
                     connection.Open();
                     return command.ExecuteNonQuery() > 0;
                 }
             }
             catch (Exception ex)
             {
-                AppLogger.LogError("DAL: Error while deleting from users by UserID.", ex);
+                AppLogger.LogError($"DAL: Error while changing DeletedDate field in Users to DateTime.Now where userID = {userID}", ex);
                 throw;
             }
         }
 
         public static bool DeleteByPersonID(int personID)
         {
-            string query = "DELETE FROM Users WHERE PersonID = @PersonID";
+            string query = @"UPDATE Users SET DeletedDate = @DeletedDate WHERE PersonID = @personID;";
             
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@PersonID", personID);
+                    DateTime DeletedDate = DateTime.Now;
+                    command.Parameters.AddWithValue("@DeletedDate", DeletedDate);
+                    command.Parameters.AddWithValue("@personID", personID);
                     connection.Open();
 
                     return command.ExecuteNonQuery() > 0;
@@ -369,28 +448,31 @@ namespace DVLD.Data
             }
             catch (Exception ex)
             {
-                AppLogger.LogError("DAL: Error while deleting from users by PersonID.", ex);
+                AppLogger.LogError($"DAL: Error while changing DeletedDate field in Users to DateTime.Now where person id = {personID}", ex);
                 throw;
             }
         }
 
         public static bool DeleteByUsername(string username)
         {
-            string query = "DELETE FROM Users WHERE Username = @Username";
+            string query = "UPDATE Users SET DeletedDate = @DeletedDate WHERE Username = @username;";
             
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@Username", username);
+                    DateTime DeletedDate = DateTime.Now;
+                    command.Parameters.AddWithValue("@DeletedDate", DeletedDate);
+                    command.Parameters.AddWithValue("@username", username);
+                    
                     connection.Open();
                     return command.ExecuteNonQuery() > 0;
                 }
             }
             catch (Exception ex)
             {
-                AppLogger.LogError("DAL: Error while deleting from users by Username.", ex);
+                AppLogger.LogError($"DAL: Error while changing DeletedDate field in Users to DateTime.Now where username = {username}", ex);
                 throw;
             }
         }

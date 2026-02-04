@@ -4,6 +4,7 @@ using DVLD.Data;
 using DVLD.Core.DTOs.Entities;
 using DVLD.Core.Logging;
 using DVLD.Business.EntityValidators;
+using DVLD.Core.Exceptions;
 
 namespace DVLD.Business
 {
