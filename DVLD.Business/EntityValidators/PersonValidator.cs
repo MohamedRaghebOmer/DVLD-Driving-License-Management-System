@@ -10,10 +10,10 @@ namespace DVLD.Business.EntityValidators
         {
             Core.Validators.PersonValidator.Validate(person);
 
-            if (PersonService.IsExists(person.NationalNumber))
+            if (PersonData.IsExists(person.NationalNumber))
                 throw new BusinessException("National number is already exists, please enter a valid one.");
 
-            if (!CountryService.IsExists(person.NationalityCountryID))
+            if (!CountryData.IsExists(person.NationalityCountryID))
                 throw new BusinessException("Country ID is not exists, please enter a valid one.");
         }
 
@@ -21,10 +21,10 @@ namespace DVLD.Business.EntityValidators
         {
             Core.Validators.PersonValidator.Validate(person);
 
-            if (PersonService.IsExists(person.NationalNumber, person.PersonID))
+            if (PersonData.IsExists(person.NationalNumber, person.PersonID))
                 throw new BusinessException("National number is already exists, please enter a valid one.");
 
-            if (!CountryService.IsExists(person.NationalityCountryID))
+            if (!CountryData.IsExists(person.NationalityCountryID))
                 throw new BusinessException("Country ID is not exists, please enter a valid one.");
         }
     }

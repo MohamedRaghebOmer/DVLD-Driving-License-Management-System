@@ -7,7 +7,7 @@ using DVLD.Business.EntityValidators;
 
 namespace DVLD.Business
 {
-    public static class CountryManager
+    public static class CountryBusiness
     {        
         public static Country Find(int id)
         {
@@ -16,7 +16,7 @@ namespace DVLD.Business
              
             try
             {
-                return CountryService.GetCountry(id);
+                return CountryData.GetCountry(id);
             }
             catch(Exception ex)
             {
@@ -29,7 +29,7 @@ namespace DVLD.Business
         {
             try
             {
-                return CountryService.GetAll();
+                return CountryData.GetAll();
             }
             catch (Exception ex)
             {
@@ -38,7 +38,7 @@ namespace DVLD.Business
             }
         }
 
-        public static bool Save(Country country)
+        public static Country Save(Country country)
         {
             // Add new country
             if (country.CountryID == -1)
@@ -47,7 +47,12 @@ namespace DVLD.Business
 
                 try
                 {
-                    return CountryService.AddNew(country);
+                    int insertedID = CountryData.AddNew(country);
+
+                    if (insertedID != -1)
+                        return CountryData.GetCountry(insertedID);
+                    else
+                        return null;
                 }
                 catch (Exception ex)
                 {
@@ -61,8 +66,10 @@ namespace DVLD.Business
 
                 try
                 {
-                    return CountryService.Update(country);
-
+                    if (CountryData.Update(country))
+                        return CountryData.GetCountry(country.CountryID);
+                    else
+                        return null;
                 }
                 catch (Exception ex)
                 {
@@ -75,12 +82,12 @@ namespace DVLD.Business
         
         public static bool Delete(int countryID)
         {
-            if (countryID < 1 || !CountryService.IsExists(countryID))
+            if (countryID < 1 || !CountryData.IsExists(countryID))
                 return false;
 
             try
             {
-                return CountryService.Delete(countryID);
+                return CountryData.Delete(countryID);
             }
             catch (Exception ex)
             {

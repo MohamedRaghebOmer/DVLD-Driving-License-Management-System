@@ -8,10 +8,10 @@ using DVLD.Core.DTOs.Enums;
 
 namespace DVLD.Data
 {
-    public static class PersonService
+    public static class PersonData
     {
         // -----------------------Create------------------------
-        public static bool AddNew(Person person)
+        public static int AddNew(Person person)
         {
             string query = @"INSERT INTO People(NationalNo, FirstName, SecondName,
                             ThirdName, LastName, DateOfBirth, Gender, Address, 
@@ -54,10 +54,11 @@ namespace DVLD.Data
                     
                     object result = command.ExecuteScalar();
 
-                    if (result != null)
-                        person.PersonID = Convert.ToInt32(result);
-
-                    return person.PersonID != -1;
+                    if (result != null && int.TryParse(result.ToString(), out int personID))
+                    {
+                        return personID;
+                    }
+                    return -1; // Indicate failure to retrieve the new PersonID
                 }
             }
             catch (Exception ex)
@@ -278,6 +279,7 @@ namespace DVLD.Data
                 throw;
             }
         }
+
 
         // ----------------------Update-------------------------
         public static bool Update(Person person)

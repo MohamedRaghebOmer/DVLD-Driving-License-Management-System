@@ -13,8 +13,8 @@ namespace DVLD.Core.DTOs.Entities
         public int CountryID
         {
             get => _countryID;
-            
-            internal set
+
+            private set
             {
                 if (value > 0)
                     _countryID = value;

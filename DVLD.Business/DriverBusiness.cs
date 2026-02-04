@@ -7,9 +7,9 @@ using DVLD.Core.Logging;
 
 namespace DVLD.Business
 {
-    public static class DriverManager
+    public static class DriverBusiness
     {
-        public static bool Save(Driver driver)
+        public static Driver Save(Driver driver)
         {
             // Add new dirver
             if (driver.DriverID == -1)
@@ -18,7 +18,12 @@ namespace DVLD.Business
                 
                 try
                 {
-                    return DriverService.AddNewDriver(driver);
+                    int newDriverID = DriverData.AddNew(driver);
+                    
+                    if (newDriverID != -1)
+                        return DriverData.GetByID(newDriverID);
+                   
+                    return null;
                 }
                 catch(Exception ex)
                 {
@@ -32,7 +37,10 @@ namespace DVLD.Business
 
                 try
                 {
-                    return DriverService.Update(driver);
+                    if (DriverData.Update(driver))
+                        return DriverData.GetByID(driver.DriverID);
+                    
+                    return null;
                 }
                 catch (Exception ex)
                 {
@@ -49,7 +57,7 @@ namespace DVLD.Business
 
             try
             {
-                return DriverService.GetDriverByID(driverID);
+                return DriverData.GetByID(driverID);
             }
             catch(Exception ex)
             {
@@ -65,7 +73,7 @@ namespace DVLD.Business
 
             try
             {
-                return DriverService.GetDriverByPersonID(personID);
+                return DriverData.GetByPersonID(personID);
             }
             catch (Exception ex)
             {
@@ -78,7 +86,7 @@ namespace DVLD.Business
         {
             try
             {
-                return DriverService.GetAllDrivers();
+                return DriverData.GetAll();
             }
             catch(Exception ex)
             {
@@ -94,7 +102,7 @@ namespace DVLD.Business
 
             try
             {
-                return DriverService.DeleteByDriverID(driverID);
+                return DriverData.DeleteByDriverID(driverID);
             }
             catch (Exception ex)
             {
@@ -110,7 +118,7 @@ namespace DVLD.Business
 
             try
             {
-                return DriverService.DeleteByPersonID(personID);
+                return DriverData.DeleteByPersonID(personID);
             }
             catch (Exception ex)
             {

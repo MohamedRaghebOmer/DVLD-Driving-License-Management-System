@@ -10,7 +10,7 @@ namespace DVLD.Business.EntityValidators
         {
             Core.Validators.TestTypeValidator.Validate(testType);
 
-            if (TestTypeService.IsTestTypeExists(testType.TestTypeTitle))
+            if (TestTypeData.IsExists(testType.TestTypeTitle))
                 throw new ValidationException("The title is already associated with another test type.");
         }
 
@@ -18,7 +18,7 @@ namespace DVLD.Business.EntityValidators
         {
             Core.Validators.TestTypeValidator.Validate(testType);
 
-            if (TestTypeService.IsTestTypeTitleUsed(testType.TestTypeTitle, testType.TestTypeID))
+            if (TestTypeData.IsTitleUsed(testType.TestTypeTitle, testType.TestTypeID))
                 throw new ValidationException("The title is already associated with another test type.");
         }
     }

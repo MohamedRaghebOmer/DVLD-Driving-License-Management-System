@@ -7,9 +7,9 @@ using DVLD.Business.EntityValidators;
 
 namespace DVLD.Business
 {
-    public class UserManager
+    public class UserBusiness
     {
-        public static bool Save(User user)
+        public static User Save(User user)
         {
             // Add new 
             if (user.UserID == -1)
@@ -18,7 +18,12 @@ namespace DVLD.Business
 
                 try
                 {
-                    return UserService.AddNew(user);
+                    int newUserID = UserData.AddNew(user);
+                    if (newUserID != -1)
+                    {
+                        return UserData.GetByID(newUserID);
+                    }
+                    return null;
                 }
                 catch (Exception ex)
                 {
@@ -32,7 +37,10 @@ namespace DVLD.Business
 
                 try
                 {
-                    return UserService.Update(user);
+                    if (UserData.Update(user))
+                        return UserData.GetByID(user.UserID);
+                    
+                    return null;
                 }
                 catch(Exception ex)
                 {
@@ -49,7 +57,7 @@ namespace DVLD.Business
 
             try
             {
-                return UserService.GetUserByID(userID);
+                return UserData.GetByID(userID);
             }
             catch(Exception ex)
             {
@@ -65,7 +73,7 @@ namespace DVLD.Business
 
             try
             {
-                return UserService.GetUserByPersonID(personID);
+                return UserData.GetByPersonID(personID);
             }
             catch (Exception ex)
             {
@@ -82,7 +90,7 @@ namespace DVLD.Business
 
             try
             {
-                return UserService.GetUserByName(username);
+                return UserData.GetByName(username);
             }
             catch (Exception ex)
             {
@@ -96,7 +104,7 @@ namespace DVLD.Business
         {
             try
             {
-                return UserService.GetAll();
+                return UserData.GetAll();
             }
             catch(Exception ex)
             {
@@ -107,12 +115,12 @@ namespace DVLD.Business
 
         public static bool DeleteByUserID(int userID)
         {
-            if (userID < 1 || !UserService.IsUserExists(userID))
+            if (userID < 1 || !UserData.IsExists(userID))
                 return false;
 
             try
             {
-                return UserService.DeleteByUserID(userID);
+                return UserData.DeleteByUserID(userID);
             }
             catch (Exception ex)
             {
@@ -123,12 +131,12 @@ namespace DVLD.Business
 
         public static bool DeleteByPersonID(int personID)
         {
-            if (personID < 1 || !UserService.IsPersonUsed(personID))
+            if (personID < 1 || !UserData.IsPersonUsed(personID))
                 return false;
 
             try
             {
-                return UserService.DeleteByPersonID(personID);
+                return UserData.DeleteByPersonID(personID);
             }
             catch (Exception ex)
             {
@@ -140,12 +148,12 @@ namespace DVLD.Business
 
         public static bool DeleteByUsername(string username)
         {
-            if (string.IsNullOrWhiteSpace(username) || !UserService.IsUsernameExists(username))
+            if (string.IsNullOrWhiteSpace(username) || !UserData.IsExists(username))
                 return false;
 
             try
             {
-                return UserService.DeleteByUsername(username);
+                return UserData.DeleteByUserName(username);
             }
             catch (Exception ex)
             {

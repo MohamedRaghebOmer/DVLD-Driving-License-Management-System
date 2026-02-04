@@ -7,10 +7,10 @@ using DVLD.Core.DTOs.Entities;
 
 namespace DVLD.Data
 {
-    public static class UserService
+    public static class UserData
     {
         // ----------------------------Create----------------------------
-        public static bool AddNew(User user)
+        public static int AddNew(User user)
         {
             string query = @"INSERT INTO Users (PersonID, Username, Password, IsActive)
                             VALUES (@PersonID, @Username, @Password, @IsActive);
@@ -29,13 +29,11 @@ namespace DVLD.Data
                     connection.Open();
 
                     object result = command.ExecuteScalar();
+                    
                     if (result != null && int.TryParse(result.ToString(), out int newUserID))
-                    {
-                        user.UserID = newUserID;
-                        return true;
-                    }
-
-                    return false;
+                         return newUserID;
+                    
+                    return -1;
                 }
             }
             catch (Exception ex)
@@ -47,7 +45,7 @@ namespace DVLD.Data
 
 
         // ----------------------------Read----------------------------
-        public static User GetUserByID(int userID)
+        public static User GetByID(int userID)
         {
             string query = "SELECT * FROM Users WHERE UserID = @UserID";
 
@@ -64,13 +62,13 @@ namespace DVLD.Data
                         if (reader.Read())
                         {
                             return new User
-                            {
-                                UserID = Convert.ToInt32(reader["UserID"]),
-                                PersonID = Convert.ToInt32(reader["PersonID"]),
-                                Username = reader["Username"].ToString(),
-                                Password = reader["Password"].ToString(),
-                                IsActive = Convert.ToBoolean(reader["IsActive"]),
-                            };
+                            (
+                                Convert.ToInt32(reader["UserID"]),
+                                Convert.ToInt32(reader["PersonID"]),
+                                reader["Username"].ToString(),
+                                reader["Password"].ToString(),
+                                Convert.ToBoolean(reader["IsActive"])
+                            );
                         }
                     }
                 }
@@ -84,7 +82,7 @@ namespace DVLD.Data
             }
         }
 
-        public static User GetUserByPersonID(int personID)
+        public static User GetByPersonID(int personID)
         {
             string query = "SELECT * FROM Users WHERE PersonID = @PersonID";
             try
@@ -100,14 +98,14 @@ namespace DVLD.Data
                         if (reader.Read())
                         {
                             return new User
-                            {
-                                UserID = Convert.ToInt32(reader["UserID"]),
-                                PersonID = Convert.ToInt32(reader["PersonID"]),
-                                Username = reader["Username"].ToString(),
-                                Password = reader["Password"].ToString(),
-                                IsActive = Convert.ToBoolean(reader["IsActive"]),
-                            };
-                        }
+                            (
+                                Convert.ToInt32(reader["UserID"]),
+                                Convert.ToInt32(reader["PersonID"]),
+                                reader["Username"].ToString(),
+                                reader["Password"].ToString(),
+                                Convert.ToBoolean(reader["IsActive"])
+                            );
+                        }   
                     }
                 }
                 return null;
@@ -119,7 +117,7 @@ namespace DVLD.Data
             }
         }
 
-        public static User GetUserByName(string username)
+        public static User GetByName(string username)
         {
             string query = "SELECT * FROM Users WHERE LOWER(Username) = LOWER(@Username);";
 
@@ -136,13 +134,13 @@ namespace DVLD.Data
                         if (reader.Read())
                         {
                             return new User
-                            {
-                                UserID = Convert.ToInt32(reader["UserID"]),
-                                PersonID = Convert.ToInt32(reader["PersonID"]),
-                                Username = reader["Username"].ToString(),
-                                Password = reader["Password"].ToString(),
-                                IsActive = Convert.ToBoolean(reader["IsActive"]),
-                            };
+                            (
+                                Convert.ToInt32(reader["UserID"]),
+                                Convert.ToInt32(reader["PersonID"]),
+                                reader["Username"].ToString(),
+                                reader["Password"].ToString(),
+                                Convert.ToBoolean(reader["IsActive"])
+                            );
                         }
 
                         return null;
@@ -156,7 +154,7 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsUserExists(int UserID)
+        public static bool IsExists(int UserID)
         {
             string query = "SELECT 1 FROM Users WHERE UserID = @UserID";
             
@@ -178,7 +176,7 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsUsernameExists(string Username)
+        public static bool IsExists(string Username)
         {
             string query = "SELECT 1 FROM Users WHERE LOWER(Username) = LOWER(@Username)";
             
@@ -195,50 +193,6 @@ namespace DVLD.Data
             catch (Exception ex)
             {
                 AppLogger.LogError("DAL: Error while checking existence in users by Username.", ex);
-                throw;
-            }
-        }
-
-        public static bool IsPersonUsedByOther(int userID, int personID)
-        {
-            string query = "SELECT 1 FROM Users WHERE PersonID = @PersonID AND UserID != @UserID";
-            
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@PersonID", personID);
-                    command.Parameters.AddWithValue("@UserID", userID);
-                    connection.Open();
-                    return command.ExecuteScalar() != null;
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while checking existence in users by PersonID for other UserID.", ex);
-                throw;
-            }
-        }
-
-        public static bool IsUsernameUsedByOther(int userID, string username)
-        {
-            string query = "SELECT 1 FROM Users WHERE LOWER(Username) = LOWER(@Username) AND UserID != @UserID";
-            
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Username", username);
-                    command.Parameters.AddWithValue("@UserID", userID);
-                    connection.Open();
-                    return command.ExecuteScalar() != null;
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while checking existence in users by Username for other UserID.", ex);
                 throw;
             }
         }
@@ -265,7 +219,51 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsActiveUser(int userID)
+        public static bool IsPersonUsed(int userID, int personID)
+        {
+            string query = "SELECT 1 FROM Users WHERE PersonID = @PersonID AND UserID != @UserID";
+            
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@PersonID", personID);
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    connection.Open();
+                    return command.ExecuteScalar() != null;
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError("DAL: Error while checking existence in users by PersonID for other UserID.", ex);
+                throw;
+            }
+        }
+
+        public static bool IsNameUsed(int userID, string username)
+        {
+            string query = "SELECT 1 FROM Users WHERE LOWER(Username) = LOWER(@Username) AND UserID != @UserID";
+            
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Username", username);
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    connection.Open();
+                    return command.ExecuteScalar() != null;
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError("DAL: Error while checking existence in users by Username for other UserID.", ex);
+                throw;
+            }
+        }
+
+        public static bool IsActive(int userID)
         {
             string query = @"SELECT 1 FROM Users WHERE UserID = @userID AND IsActive = 1;";
 
@@ -399,7 +397,7 @@ namespace DVLD.Data
             }
         }
 
-        public static bool DeleteByUsername(string username)
+        public static bool DeleteByUserName(string username)
         {
             string query = "DELETE FROM Users WHERE LOWER(UserName) = LOWER(@username);";
             

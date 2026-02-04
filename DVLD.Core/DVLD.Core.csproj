@@ -41,13 +41,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entities\Driver.cs" />
-    <Compile Include="Entities\TestType.cs" />
+    <Compile Include="DTOs\Entities\Driver.cs" />
+    <Compile Include="DTOs\Entities\TestType.cs" />
     <Compile Include="Logging\AppLogger.cs" />
-    <Compile Include="Entities\Country.cs" />
-    <Compile Include="Entities\Person.cs" />
-    <Compile Include="Entities\User.cs" />
-    <Compile Include="Enums\Enums.cs" />
+    <Compile Include="DTOs\Entities\Country.cs" />
+    <Compile Include="DTOs\Entities\Person.cs" />
+    <Compile Include="DTOs\Entities\User.cs" />
+    <Compile Include="DTOs\Enums\Enums.cs" />
     <Compile Include="Exceptions\BusinessException.cs" />
     <Compile Include="Exceptions\ValidationException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
