@@ -4,6 +4,7 @@ using DVLD.Data;
 using DVLD.Core.DTOs.Entities;
 using DVLD.Core.Logging;
 using DVLD.Business.EntityValidators;
+using DVLD.Core.Exceptions;
 
 namespace DVLD.Business
 {
@@ -12,16 +13,16 @@ namespace DVLD.Business
         public static TestType Save(TestType testType)
         {
             // Add new test type
-            if (testType.TestTypeID == -1)
+            if (testType.TestTypeId == -1)
             {
                 TestTypeValidator.AddNewValidator(testType);
 
                 try
                 {
-                    int newTestTypeID = TestTypeData.AddNew(testType);
+                    int newTestTypeId = TestTypeData.Add(testType);
 
-                    if (newTestTypeID != -1)
-                        return TestTypeData.Get(newTestTypeID);
+                    if (newTestTypeId != -1)
+                        return TestTypeData.Get(newTestTypeId);
                     
                     return null;
                 }
@@ -38,7 +39,7 @@ namespace DVLD.Business
                 try
                 {
                     if (TestTypeData.Update(testType))
-                        return TestTypeData.Get(testType.TestTypeID);
+                        return TestTypeData.Get(testType.TestTypeId);
                     return null;
                 }
                 catch (Exception ex)
@@ -50,14 +51,14 @@ namespace DVLD.Business
             }
         }
 
-        public static TestType GetTestType(int testTypeID)
+        public static TestType Find(int testTypeId)
         {
-            if (testTypeID < 1)
+            if (testTypeId < 1)
                 return null;
 
             try
             {
-                return TestTypeData.Get(testTypeID);
+                return TestTypeData.Get(testTypeId);
             }
             catch (Exception ex)
             {
@@ -67,7 +68,7 @@ namespace DVLD.Business
 
         }
 
-        public static TestType GetTestType(string testTypeTitle)
+        public static TestType Find(string testTypeTitle)
         {
             if (string.IsNullOrWhiteSpace(testTypeTitle))
                 return null;
@@ -84,7 +85,7 @@ namespace DVLD.Business
 
         }
 
-        public static DataTable GetAllTestTypes()
+        public static DataTable GetAll()
         {
             try
             {
@@ -98,27 +99,59 @@ namespace DVLD.Business
 
         }
 
-        public static bool DeleteTestType(int testTypeID)
+        public static bool Exists(int testTypeId)
         {
-            if (testTypeID < 1)
+            if (testTypeId < 1)
                 return false;
 
             try
             {
-                return TestTypeData.Delete(testTypeID);
+                return TestTypeData.Exists(testTypeId);
             }
             catch (Exception ex)
             {
-                AppLogger.LogError($"BLL: Error while trying to delete test type with id = {testTypeID}.");
+                AppLogger.LogError($"BLL: Error while trying to check if test type with id = {testTypeId} exists.");
+                throw new Exception("We encountered a technical issue. Please try again later.", ex);
+            }
+        }
+
+        public static bool IsTitleUsed(string title, int excludedTestTypeId)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                return false;
+
+            try
+            {
+                return TestTypeData.IsTitleUsed(title, excludedTestTypeId);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError("BLL: Error while trying to check if test type title is used.");
+                throw new Exception("We encountered a technical issue. Please try again later.", ex);
+            }
+        }
+
+        public static bool Delete(int testTypeId)
+        {
+            if (testTypeId < 1 || !Exists(testTypeId))
+                throw new ValidationException("The specified test type does not exist.");
+
+            try
+            {
+                return TestTypeData.Delete(testTypeId);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"BLL: Error while trying to delete test type with id = {testTypeId}.");
                 throw new Exception("We encountered a technical issue. Please try again later.", ex);
             }
 
         }
 
-        public static bool DeleteTestType(string testTypeTitle)
+        public static bool Delete(string testTypeTitle)
         {
-            if (string.IsNullOrWhiteSpace(testTypeTitle))
-                return false;
+            if (string.IsNullOrWhiteSpace(testTypeTitle) || !IsTitleUsed(testTypeTitle, -1))
+                throw new ValidationException("The specified test type does not exist.");
 
             try
             {
@@ -131,6 +164,5 @@ namespace DVLD.Business
             }
 
         }
-
     }
 }

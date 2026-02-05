@@ -11,17 +11,17 @@ namespace DVLD.Data
     public static class PersonData
     {
         // -----------------------Create------------------------
-        public static int AddNew(Person person)
+        public static int Add(Person person)
         {
             string query = @"INSERT INTO People(NationalNo, FirstName, SecondName,
                             ThirdName, LastName, DateOfBirth, Gender, Address, 
-                            Phone, Email, NationalityCountryID, ImagePath)
+                            Phone, Email, NationalityCountryId, ImagePath)
                             VALUES
                             (@NationalNo, @FirstName, @SecondName,
                             @ThirdName, @LastName, @DateOfBirth,
                             @Gender, @Address, @Phone, @Email,
-                            @NationalityCountryID, @ImagePath)
-                            SELECT SCOPE_IDENTITY();";
+                            @NationalityCountryId, @ImagePath)
+                            SELECT SCOPE_IdENTITY();";
 
             try
             {
@@ -44,7 +44,7 @@ namespace DVLD.Data
                         command.Parameters.AddWithValue("@Email", person.Email);
                     else
                         command.Parameters.AddWithValue("@Email", DBNull.Value);
-                    command.Parameters.AddWithValue("@NationalityCountryID", person.NationalityCountryID);
+                    command.Parameters.AddWithValue("@NationalityCountryId", person.NationalityCountryId);
                     if (!string.IsNullOrEmpty(person.ImagePath))
                         command.Parameters.AddWithValue("@ImagePath", person.ImagePath);
                     else
@@ -54,11 +54,9 @@ namespace DVLD.Data
                     
                     object result = command.ExecuteScalar();
 
-                    if (result != null && int.TryParse(result.ToString(), out int personID))
-                    {
-                        return personID;
-                    }
-                    return -1; // Indicate failure to retrieve the new PersonID
+                    if (result != null && int.TryParse(result.ToString(), out int personId))
+                        return personId;
+                    return -1; // Indicate failure to retrieve the new PersonId
                 }
             }
             catch (Exception ex)
@@ -70,16 +68,16 @@ namespace DVLD.Data
 
 
         // ----------------------Read---------------------------
-        public static Person Get(int personID)
+        public static Person Get(int personId)
         {
-            string query = @"SELECT * FROM People WHERE PersonID = @PersonID;";
+            string query = @"SELECT * FROM People WHERE PersonId = @PersonId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@PersonID", personID);
+                    command.Parameters.AddWithValue("@PersonId", personId);
                     connection.Open();
 
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -87,7 +85,7 @@ namespace DVLD.Data
                         if (reader.Read())
                         {
                             return new Person(
-                                (int)reader["PersonID"],
+                                (int)reader["PersonId"],
                                 (string)reader["NationalNo"],
                                 (string)reader["FirstName"],
                                 (string)reader["SecondName"],
@@ -98,7 +96,7 @@ namespace DVLD.Data
                                 (string)reader["Address"],
                                 (string)reader["Phone"],
                                 reader["Email"] == DBNull.Value ? string.Empty : (string)reader["Email"],
-                                (int)reader["NationalityCountryID"],
+                                (int)reader["NationalityCountryId"],
                                 reader["ImagePath"] == DBNull.Value ? string.Empty : (string)reader["ImagePath"]
                             );
                         }
@@ -130,7 +128,7 @@ namespace DVLD.Data
                         if (reader.Read())
                         {
                             return new Person(
-                                (int)reader["PersonID"],
+                                (int)reader["PersonId"],
                                 (string)reader["NationalNo"],
                                 (string)reader["FirstName"],
                                 (string)reader["SecondName"],
@@ -141,7 +139,7 @@ namespace DVLD.Data
                                 (string)reader["Address"],
                                 (string)reader["Phone"],
                                 reader["Email"] == DBNull.Value ? string.Empty : (string)reader["Email"],
-                                (int)reader["NationalityCountryID"],
+                                (int)reader["NationalityCountryId"],
                                 reader["ImagePath"] == DBNull.Value ? string.Empty : (string)reader["ImagePath"]
                             );
                         }
@@ -156,16 +154,16 @@ namespace DVLD.Data
             return null;
         }
 
-        public static bool IsExists(int personID)
+        public static bool Exists(int personId)
         {
-            string query = "SELECT 1 FROM People WHERE PersonID = @personID;";
+            string query = "SELECT 1 FROM People WHERE PersonId = @personId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query , connection))
                 {
-                    command.Parameters.AddWithValue("@personID", personID);
+                    command.Parameters.AddWithValue("@personId", personId);
                     
                     connection.Open();
 
@@ -179,9 +177,9 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsExists(string nationalNumber)
+        public static bool IsNationalNumberUsed(string nationalNumber, int excludedId)
         {
-            string query = "SELECT 1 FROM People WHERE NationalNo = @nationalNumber;";
+            string query = "SELECT 1 FROM People WHERE NationalNo = @nationalNumber AND PersonId != @excludedId;";
 
             try
             {
@@ -189,6 +187,7 @@ namespace DVLD.Data
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@nationalNumber", nationalNumber);
+                    command.Parameters.AddWithValue("@excludedId", excludedId);
 
                     connection.Open();
 
@@ -202,40 +201,16 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsExists(string nationalNumber, int excludedID)
+        public static bool IsEmailUsed(string email, int excludedId)
         {
-            string query = "SELECT 1 FROM People WHERE NationalNo = @nationalNumber AND PersonID != @excludedID;";
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@nationalNumber", nationalNumber);
-                    command.Parameters.AddWithValue("@excludedID", excludedID);
-
-                    connection.Open();
-
-                    return command.ExecuteScalar() != null;
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while reading from People." + ex);
-                throw;
-            }
-        }
-
-        public static bool IsEmailExists(string email)
-        {
-            string query = "SELECT 1 FROM People WHERE Email = @Email;";
-            
+            string query = "SELECT 1 FROM People WHERE Email = @Email AND PersonId != @excludedId;";
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Email", email);
+                    command.Parameters.AddWithValue("@excludedId", excludedId);
                     connection.Open();
                     return command.ExecuteScalar() != null;
                 }
@@ -281,7 +256,7 @@ namespace DVLD.Data
         }
 
 
-        // ----------------------Update-------------------------
+        // -----------------------Update-------------------------
         public static bool Update(Person person)
         {
             string query = @"UPDATE People 
@@ -295,9 +270,9 @@ namespace DVLD.Data
                                  Address = @Address, 
                                  Phone = @Phone, 
                                  Email = @Email, 
-                                 NationalityCountryID = @NationalityCountryID, 
+                                 NationalityCountryId = @NationalityCountryId, 
                                  ImagePath = @ImagePath
-                             WHERE PersonID = @PersonID;";
+                             WHERE PersonId = @PersonId;";
 
             try
             {
@@ -320,12 +295,12 @@ namespace DVLD.Data
                         command.Parameters.AddWithValue("@Email", person.Email);
                     else
                         command.Parameters.AddWithValue("@Email", DBNull.Value);
-                    command.Parameters.AddWithValue("@NationalityCountryID", person.NationalityCountryID);
+                    command.Parameters.AddWithValue("@NationalityCountryId", person.NationalityCountryId);
                     if (!string.IsNullOrEmpty(person.ImagePath))
                         command.Parameters.AddWithValue("@ImagePath", person.ImagePath);
                     else
                         command.Parameters.AddWithValue("@ImagePath", DBNull.Value);
-                    command.Parameters.AddWithValue("@PersonID", person.PersonID);
+                    command.Parameters.AddWithValue("@PersonId", person.PersonId);
 
                     connection.Open();
 
@@ -340,17 +315,17 @@ namespace DVLD.Data
         }
 
 
-        // ---------------------Delete--------------------------
-        public static bool Delete(int personID)
+        // -----------------------Delete--------------------------
+        public static bool Delete(int personId)
         {
-            string query = @"DELETE FROM People WHERE PersonID = @personID;";
+            string query = @"DELETE FROM People WHERE PersonId = @personId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@personID", personID);
+                    command.Parameters.AddWithValue("@personId", personId);
                     connection.Open();
 
                     return command.ExecuteNonQuery() > 0;

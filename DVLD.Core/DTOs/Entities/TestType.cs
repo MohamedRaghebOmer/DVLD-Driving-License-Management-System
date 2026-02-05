@@ -4,21 +4,21 @@ namespace DVLD.Core.DTOs.Entities
 {
     public class TestType
     {
-        private int _testTypeID;
+        private int _testTypeId;
         private string _testTypeTitle;
         private string _testTypeDescription;
         private  decimal _testTypeFees;
 
-        public int TestTypeID
+        public int TestTypeId
         {
-            get => _testTypeID;
+            get => _testTypeId;
 
             private set
             {
                 if (value < 1)
                     throw new ValidationException("Test type id can't be negative.");
 
-                _testTypeID = value;
+                _testTypeId = value;
             }
         }
 
@@ -45,6 +45,9 @@ namespace DVLD.Core.DTOs.Entities
             {
                 if (string.IsNullOrWhiteSpace(value))
                     throw new ValidationException("Test type description can't be empty");
+                else if (value.Length > 500)
+                    throw new ValidationException("Test type description can't exceeds 500 character.");
+                _testTypeDescription = value;
             }
         }
 
@@ -56,13 +59,14 @@ namespace DVLD.Core.DTOs.Entities
             {
                 if (value < 0)
                     throw new ValidationException("Test type fees can't be negative.");
+                _testTypeFees = value;
             }
         }
 
 
         public TestType()
         {
-            this._testTypeID = -1;
+            this._testTypeId = -1;
             this._testTypeTitle = string.Empty;
             this._testTypeDescription = string.Empty;
             this._testTypeFees = 0;
@@ -75,9 +79,9 @@ namespace DVLD.Core.DTOs.Entities
             this.TestTypeFees = testTypeFees;
         }
 
-        internal TestType(int testTypeID, string testTypeTitle, string testTypeDescription, decimal testTypeFees) : this()
+        internal TestType(int testTypeId, string testTypeTitle, string testTypeDescription, decimal testTypeFees) : this()
         {
-            this.TestTypeID = testTypeID;
+            this.TestTypeId = testTypeId;
             this.TestTypeTitle = testTypeTitle;
             this.TestTypeDescription = testTypeDescription;
             this.TestTypeFees = testTypeFees;

@@ -10,10 +10,10 @@ namespace DVLD.Data
     public static class TestTypeData
     {
         // ---------------------------Create----------------------------
-        public static int AddNew(TestType testType)
+        public static int Add(TestType testType)
         {
             string qurey = @"INSERT INTO TestTypes(TestTypeTitle, TestTypeDescription, TestTypeFees)
-                            VALUES (@title, @description, @fees); SELECT SCOPE_IDENTITY();";
+                            VALUES (@title, @description, @fees); SELECT SCOPE_IdENTITY();";
 
             try
             {
@@ -27,8 +27,8 @@ namespace DVLD.Data
 
                     object result = command.ExecuteScalar();
 
-                    if (result != null && int.TryParse(result.ToString(), out int insertedID))
-                        return insertedID;
+                    if (result != null && int.TryParse(result.ToString(), out int insertedId))
+                        return insertedId;
 
                     return -1;
                 }
@@ -42,16 +42,16 @@ namespace DVLD.Data
 
 
         // ---------------------------Read------------------------------
-        public static TestType Get(int testTypeID)
+        public static TestType Get(int testTypeId)
         {
-            string query = "SELECT * FROM TestTypes WHERE TestTypeID = @id;";
+            string query = "SELECT * FROM TestTypes WHERE TestTypeId = @id;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@id", testTypeID);
+                    command.Parameters.AddWithValue("@id", testTypeId);
                     connection.Open();
 
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -60,7 +60,7 @@ namespace DVLD.Data
                         {
                             TestType testType = new TestType
                             (
-                                Convert.ToInt32(reader["TestTypeID"]),
+                                Convert.ToInt32(reader["TestTypeId"]),
                                 reader["TestTypeTitle"].ToString(),
                                 reader["TestTypeDescription"] == DBNull.Value ? string.Empty : reader["TestTypeDescription"].ToString(),
                                 Convert.ToDecimal(reader["TestTypeFees"])
@@ -75,7 +75,7 @@ namespace DVLD.Data
             }
             catch (Exception ex)
             {
-                AppLogger.LogError("DAL: Error while retrieving TestType by ID.", ex);
+                AppLogger.LogError("DAL: Error while retrieving TestType by Id.", ex);
                 throw;
             }
         }
@@ -98,7 +98,7 @@ namespace DVLD.Data
                         {
                             return new TestType
                             (
-                                Convert.ToInt32(reader["TestTypeID"]),
+                                Convert.ToInt32(reader["TestTypeId"]),
                                 reader["TestTypeTitle"].ToString(),
                                 reader["TestTypeDescription"] == DBNull.Value ? string.Empty : reader["TestTypeDescription"].ToString(),
                                 Convert.ToDecimal(reader["TestTypeFees"])
@@ -147,16 +147,16 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsExists(int testTypeID)
+        public static bool Exists(int testTypeId)
         {
-            string query = "SELECT 1 FROM TestTypes WHERE TestTypeID = @id;";
+            string query = "SELECT 1 FROM TestTypes WHERE TestTypeId = @id;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@id", testTypeID);
+                    command.Parameters.AddWithValue("@id", testTypeId);
                     connection.Open();
 
                     return command.ExecuteScalar() != null;
@@ -169,31 +169,9 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsExists(string testTypeTitle)
+        public static bool IsTitleUsed(string testTypeTitle, int excludedTestTypeId)
         {
-            string query = "SELECT 1 FROM TestTypes WHERE LOWER(TestTypeTitle) = LOWER(@title);";
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@title", testTypeTitle);
-                    connection.Open();
-
-                    return command.ExecuteScalar() != null;
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while selecting form TestTypes.", ex);
-                throw;
-            }
-        }
-
-        public static bool IsTitleUsed(string testTypeTitle, int excludedTestTypeID)
-        {
-            string query = "SELECT 1 FROM TestTypes WHERE TestTypeTitle = @title AND TestTypeID != @id;";
+            string query = "SELECT 1 FROM TestTypes WHERE LOWER(TestTypeTitle) = LOWER(@title) AND TestTypeId != @id;";
             
             try
             {
@@ -201,7 +179,7 @@ namespace DVLD.Data
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@title", testTypeTitle);
-                    command.Parameters.AddWithValue("@id", excludedTestTypeID);
+                    command.Parameters.AddWithValue("@id", excludedTestTypeId);
                     
                     connection.Open();
 
@@ -220,7 +198,7 @@ namespace DVLD.Data
         public static bool Update(TestType testType)
         {
             string query = @"UPDATE TestTypes SET TestTypeTitle = @title, TestTypeDescription = @descripition, 
-                            TestTypeFees = @fees WHERE TestTypeID = @id;";
+                            TestTypeFees = @fees WHERE TestTypeId = @id;";
 
             try
             {
@@ -230,7 +208,7 @@ namespace DVLD.Data
                     command.Parameters.AddWithValue("@title", testType.TestTypeTitle);
                     command.Parameters.AddWithValue("@descripition", testType.TestTypeDescription);
                     command.Parameters.AddWithValue("@fees", testType.TestTypeFees);
-                    command.Parameters.AddWithValue("@id", testType.TestTypeID);
+                    command.Parameters.AddWithValue("@id", testType.TestTypeId);
 
                     connection.Open();
 
@@ -239,7 +217,7 @@ namespace DVLD.Data
             }
             catch (Exception ex)
             {
-                AppLogger.LogError($"DLL: Error while updating Drivers where driver id = {testType.TestTypeID}.", ex);
+                AppLogger.LogError($"DLL: Error while updating Drivers where driver id = {testType.TestTypeId}.", ex);
                 throw;
             }
 
@@ -247,16 +225,16 @@ namespace DVLD.Data
 
 
         // --------------------------Delete----------------------------
-        public static bool Delete(int testTypeID)
+        public static bool Delete(int testTypeId)
         {
-            string query = "DELETE FROM TestTypes WHERE TestTypeID = @id;";
+            string query = "DELETE FROM TestTypes WHERE TestTypeId = @id;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@id", testTypeID);
+                    command.Parameters.AddWithValue("@id", testTypeId);
                     connection.Open();
 
                     return command.ExecuteNonQuery() > 0;
@@ -264,14 +242,14 @@ namespace DVLD.Data
             }
             catch(Exception ex)
             {
-                AppLogger.LogError($"DAL: Error while deleting from TestTypes where TestTypeID = {testTypeID}", ex);
+                AppLogger.LogError($"DAL: Error while deleting from TestTypes where TestTypeId = {testTypeId}", ex);
                 throw;
             }
         }
 
         public static bool Delete(string testTypeTitle)
         {
-            string query = "DELETE FROM TestTypes WHERE TestTypeTitle = @testTypeTitle;";
+            string query = "DELETE FROM TestTypes WHERE LOWER(TestTypeTitle) = LOWER(@testTypeTitle);";
 
             try
             {

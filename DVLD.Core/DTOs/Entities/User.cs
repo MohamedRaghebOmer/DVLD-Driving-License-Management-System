@@ -6,34 +6,34 @@ namespace DVLD.Core.DTOs.Entities
 {
     public class User
     {
-        private int _userID;
-        private int _personID;
+        private int _userId;
+        private int _personId;
         private string _username;
         private string _password;
         private bool _isActive;
 
-        public int UserID
+        public int UserId
         {
-            get => _userID;
+            get => _userId;
 
             private set
             {
                 if (value <= 0)
-                    throw new ValidationException("UserID can't be negative.");
+                    throw new ValidationException("UserId can't be negative.");
 
-                _userID = value;
+                _userId = value;
             }
         }
 
-        public int PersonID
+        public int PersonId
         {
-            get => _personID;
+            get => _personId;
             set
             {
                 if (value <= 0)
-                    throw new ValidationException("PersonID must be a positive integer.");
+                    throw new ValidationException("PersonId must be a positive integer.");
                 
-                _personID = value;
+                _personId = value;
             }
         }
 
@@ -69,26 +69,26 @@ namespace DVLD.Core.DTOs.Entities
 
         public User()
         {
-            this._userID = -1;
-            this._personID = -1;
+            this._userId = -1;
+            this._personId = -1;
             this._username = string.Empty;
             this._password = string.Empty;
             this._isActive = false;
         }
 
-        public User(int personID, string username, string password, bool isActive) : this()
+        public User(int personId, string username, string password, bool isActive) : this()
         {
-            // this._userID = -1;
-            this.PersonID = personID;
+            // this._userId = -1;
+            this.PersonId = personId;
             this.Username = username;
             this.Password = password;
             this.IsActive = isActive;
         }
 
-        internal User(int userID, int personID, string username, string password, bool isActive) : this()
+        internal User(int userId, int personId, string username, string password, bool isActive) : this()
         {
-            this.UserID = userID;
-            this.PersonID = personID;
+            this.UserId = userId;
+            this.PersonId = personId;
             this.Username = username;
             this.Password = password;
             this.IsActive = isActive;

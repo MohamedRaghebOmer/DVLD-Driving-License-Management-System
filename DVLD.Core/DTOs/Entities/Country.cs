@@ -7,19 +7,19 @@ namespace DVLD.Core.DTOs.Entities
 {
     public class Country
     {
-        private int _countryID;
+        private int _countryId;
         private string _countryName;
 
-        public int CountryID
+        public int CountryId
         {
-            get => _countryID;
+            get => _countryId;
 
             private set
             {
                 if (value > 0)
-                    _countryID = value;
+                    _countryId = value;
                 else
-                    throw new ValidationException("Invalid CountryID.");
+                    throw new ValidationException("Invalid CountryId.");
             }
         }
 
@@ -43,20 +43,20 @@ namespace DVLD.Core.DTOs.Entities
         // Consturctores
         public Country()
         {
-            this._countryID = -1;
+            this._countryId = -1;
             this._countryName = string.Empty;
         }
 
         public Country(string countryName)
         {
-            this._countryID = -1;
+            this._countryId = -1;
             this._countryName = countryName;
         }
 
-        // To use inside DVLD.Data.GetCountryInfoByID only
+        // To use inside DVLD.Data.GetCountryInfoById only
         internal Country(int id, string countryName)
         {
-            this._countryID = id;
+            this._countryId = id;
             this._countryName = countryName;
         }
     }

@@ -10,13 +10,13 @@ namespace DVLD.Business.EntityValidators
         {
             Core.Validators.DriverValidator.Validate(driver);
 
-            if (UserData.IsExists(driver.CreatedByUserID))
+            if (UserData.Exists(driver.CreatedByUserId))
             {
-                if (UserData.IsActive(driver.CreatedByUserID))
+                if (UserData.IsActive(driver.CreatedByUserId))
                 {
-                    if (PersonData.IsExists(driver.PersonID))
+                    if (PersonData.Exists(driver.PersonId))
                     {
-                        if (DriverData.IsPersonUsed(driver.PersonID))
+                        if (DriverData.IsPersonUsed(driver.PersonId, -1))
                             throw new BusinessException("The person is already associated with another driver.");
                     }
                     else
@@ -26,23 +26,23 @@ namespace DVLD.Business.EntityValidators
                     throw new BusinessException("Account inactive. Please contact your administrator to activate your account.");
             }
             else
-                throw new BusinessException($"User with id = {driver.CreatedByUserID} doesn't exits.");
+                throw new BusinessException($"User with id = {driver.CreatedByUserId} doesn't exits.");
         }
 
         public static void UpdateValidator(Driver driver)
         {
             Core.Validators.DriverValidator.Validate(driver);
-            Driver storedInfo = DriverData.GetByID(driver.DriverID);
+            Driver storedInfo = DriverData.GetByDriverId(driver.DriverId);
 
-            if (storedInfo.CreatedByUserID == driver.CreatedByUserID)
+            if (storedInfo.CreatedByUserId == driver.CreatedByUserId)
             {
-                if (UserData.IsActive(driver.CreatedByUserID))
+                if (UserData.IsActive(driver.CreatedByUserId))
                 {
                     if (storedInfo.CreatedDate == driver.CreatedDate)
                     {
-                        if (PersonData.IsExists(driver.PersonID))
+                        if (PersonData.Exists(driver.PersonId))
                         {
-                            if (DriverData.IsPersonUsed(driver.PersonID, driver.DriverID))
+                            if (DriverData.IsPersonUsed(driver.PersonId, driver.DriverId))
                                 throw new BusinessException("The person is already associated with another driver.");
                         }
                         else

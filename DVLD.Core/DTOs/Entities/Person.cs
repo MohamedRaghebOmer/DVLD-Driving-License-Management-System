@@ -8,7 +8,7 @@ namespace DVLD.Core.DTOs.Entities
     {
         private const int MaxNameLength = 15;
 
-        private int _personID;
+        private int _personId;
         private string _nationalNo;
         private string _firstName;
         private string _secondName;
@@ -19,19 +19,19 @@ namespace DVLD.Core.DTOs.Entities
         private string _address;
         private string _phone;
         private string _email;
-        private int _countryID;
+        private int _countryId;
         private string _imagePath;
 
-        public int PersonID
+        public int PersonId
         {
-            get => _personID;
+            get => _personId;
 
             private set
             {
                 if (value > 0)
-                    _personID = value;
+                    _personId = value;
                 else
-                    throw new ValidationException("Invalid PersonID");
+                    throw new ValidationException("Invalid PersonId");
             }
         }
 
@@ -198,16 +198,16 @@ namespace DVLD.Core.DTOs.Entities
             }
         }
 
-        public int NationalityCountryID
+        public int NationalityCountryId
         {
-            get => _countryID;
+            get => _countryId;
             
             set
             {
                 if (value > 0)
-                    _countryID = value;
+                    _countryId = value;
                 else
-                    throw new ValidationException("Invalid country ID.");
+                    throw new ValidationException("Invalid country Id.");
             }
 
         }
@@ -230,7 +230,7 @@ namespace DVLD.Core.DTOs.Entities
 
         public Person()
         {
-            this._personID = -1;
+            this._personId = -1;
             this._nationalNo = string.Empty;
             this._firstName = string.Empty;
             this._secondName = string.Empty;
@@ -241,15 +241,15 @@ namespace DVLD.Core.DTOs.Entities
             this._address = string.Empty;
             this._phone = string.Empty;
             this._email = string.Empty;
-            this._countryID = -1;
+            this._countryId = -1;
             this._imagePath = string.Empty;
         }
 
         public Person(string nationalNo, string firstName, string secondName, string thirdName,
                       string lastName, DateTime dateOfBirth, Gender gender, string address, string phone,
-                      string email, int nationalityCountryID, string imagePath) : this()
+                      string email, int nationalityCountryId, string imagePath) : this()
         {
-            // this._personID = -1;
+            // this._personId = -1;
             this.NationalNumber = nationalNo;
             this.FirstName = firstName;
             this.SecondName = secondName;
@@ -260,15 +260,15 @@ namespace DVLD.Core.DTOs.Entities
             this.Address = address;
             this.Phone = phone;
             this.Email = email;
-            this.NationalityCountryID = nationalityCountryID;
+            this.NationalityCountryId = nationalityCountryId;
             this.ImagePath = imagePath;
         }
     
-        internal Person(int personID, string nationalNo,  string firstName, string secondName, string thirdName,
+        internal Person(int personId, string nationalNo,  string firstName, string secondName, string thirdName,
                       string lastName, DateTime dateOfBirth, Gender gender, string address, string phone,
-                      string email, int nationalityCountryID, string imagePath) : this()
+                      string email, int nationalityCountryId, string imagePath) : this()
         {
-            this.PersonID = personID;
+            this.PersonId = personId;
             this.NationalNumber = nationalNo;
             this.FirstName = firstName;
             this.SecondName = secondName;
@@ -279,7 +279,7 @@ namespace DVLD.Core.DTOs.Entities
             this.Address = address;
             this.Phone = phone;
             this.Email = email;
-            this.NationalityCountryID = nationalityCountryID;
+            this.NationalityCountryId = nationalityCountryId;
             this.ImagePath = imagePath;
         }
     }

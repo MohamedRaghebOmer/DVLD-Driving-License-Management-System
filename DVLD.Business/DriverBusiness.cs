@@ -4,6 +4,7 @@ using DVLD.Core.DTOs.Entities;
 using DVLD.Business.EntityValidators;
 using DVLD.Data;
 using DVLD.Core.Logging;
+using DVLD.Core.Exceptions;
 
 namespace DVLD.Business
 {
@@ -11,17 +12,17 @@ namespace DVLD.Business
     {
         public static Driver Save(Driver driver)
         {
-            // Add new dirver
-            if (driver.DriverID == -1)
+            // Add new driver
+            if (driver.DriverId == -1)
             {
                 DriverValidator.AddNewValidator(driver);
                 
                 try
                 {
-                    int newDriverID = DriverData.AddNew(driver);
+                    int newDriverId = DriverData.Add(driver);
                     
-                    if (newDriverID != -1)
-                        return DriverData.GetByID(newDriverID);
+                    if (newDriverId != -1)
+                        return DriverData.GetByDriverId(newDriverId);
                    
                     return null;
                 }
@@ -38,7 +39,7 @@ namespace DVLD.Business
                 try
                 {
                     if (DriverData.Update(driver))
-                        return DriverData.GetByID(driver.DriverID);
+                        return DriverData.GetByDriverId(driver.DriverId);
                     
                     return null;
                 }
@@ -50,14 +51,14 @@ namespace DVLD.Business
             }
         }
 
-        public static Driver GetDriverByID(int driverID)
+        public static Driver FindByDriverId(int driverId)
         {
-            if (driverID < 1)
+            if (driverId < 1)
                 return null;
 
             try
             {
-                return DriverData.GetByID(driverID);
+                return DriverData.GetByDriverId(driverId);
             }
             catch(Exception ex)
             {
@@ -66,14 +67,14 @@ namespace DVLD.Business
             }
         }
 
-        public static Driver GetDriverByPersonID(int personID)
+        public static Driver FindByPersonId(int personId)
         {
-            if (personID < 1)
+            if (personId < 1)
                 return null;
 
             try
             {
-                return DriverData.GetByPersonID(personID);
+                return DriverData.GetByPersonId(personId);
             }
             catch (Exception ex)
             {
@@ -82,7 +83,7 @@ namespace DVLD.Business
             }
         }
 
-        public static DataTable GetAllDrivers()
+        public static DataTable GetAll()
         {
             try
             {
@@ -95,37 +96,68 @@ namespace DVLD.Business
             }
         }
 
-        public static bool DeleteByDriverID(int driverID)
+        public static bool IsPersonUsed(int personId, int excludedDriverId)
         {
-            if (driverID < 1)
+            if (personId < 1 || excludedDriverId < 1)
                 return false;
-
             try
             {
-                return DriverData.DeleteByDriverID(driverID);
+                return DriverData.IsPersonUsed(personId, excludedDriverId);
             }
             catch (Exception ex)
             {
-                AppLogger.LogError($"BLL: Errror while deleting dirver with id = {driverID}.");
+                AppLogger.LogError("BLL: Error while checking if person is used by any driver excluding a specific driver.");
                 throw new Exception("We encountered a technical issue. Please try again later.", ex);
             }
         }
 
-        public static bool DeleteByPersonID(int personID)
+        public static bool DoesDriverIdExist(int driverId)
         {
-            if (personID < 1)
+            if (driverId < 1)
                 return false;
-
             try
             {
-                return DriverData.DeleteByPersonID(personID);
+                return DriverData.Exists(driverId);
             }
             catch (Exception ex)
             {
-                AppLogger.LogError($"BLL: Errror while deleting dirver with person id = {personID}.");
+                AppLogger.LogError("BLL: Error while checking existence of driver by id.");
+                throw new Exception("We encountered a technical issue. Please try again later.", ex);
+            }
+        }
+
+        public static bool DeleteByDriverId(int driverId)
+        {
+            if (driverId < 1 || !DriverData.Exists(driverId))
+                throw new ValidationException("The specified driver does not exist.");
+
+            try
+            {
+                return DriverData.DeleteByDriverId(driverId);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"BLL: Errror while deleting dirver with id = {driverId}.");
+                throw new Exception("We encountered a technical issue. Please try again later.", ex);
+            }
+        }
+
+        public static bool DeleteByPersonId(int personId)
+        {
+            if (personId < 1 || !DriverData.IsPersonUsed(personId, -1))
+                throw new ValidationException("The specified person does not exist.");
+
+            try
+            {
+                return DriverData.DeleteByPersonId(personId);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"BLL: Errror while deleting dirver with person id = {personId}.");
                 throw new Exception("We encountered a technical issue. Please try again later.", ex);
             }
 
         }
+
     }
 }

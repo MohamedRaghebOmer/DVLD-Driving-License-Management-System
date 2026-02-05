@@ -10,11 +10,11 @@ namespace DVLD.Data
     public static class DriverData
     {
         // -----------------------Create-------------------------
-        public static int AddNew(Driver driver)
+        public static int Add(Driver driver)
         {
-            string query = @"INSERT INTO Drivers (PersonID, CreatedByUserID, CreatedDate)
-                    VALUES (@PersonID, @CreatedByUserID, @CreatedDate);
-                    SELECT SCOPE_IDENTITY();";
+            string query = @"INSERT INTO Drivers (PersonId, CreatedByUserId, CreatedDate)
+                    VALUES (@PersonId, @CreatedByUserId, @CreatedDate);
+                    SELECT SCOPE_IdENTITY();";
 
             try
             {
@@ -25,16 +25,16 @@ namespace DVLD.Data
                     if (dt.Second >= 30) dt = dt.AddMinutes(1);
                     DateTime smallDateTimeValue = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0);
 
-                    command.Parameters.AddWithValue("@PersonID", driver.PersonID);
-                    command.Parameters.AddWithValue("@CreatedByUserID", driver.CreatedByUserID);
+                    command.Parameters.AddWithValue("@PersonId", driver.PersonId);
+                    command.Parameters.AddWithValue("@CreatedByUserId", driver.CreatedByUserId);
                     command.Parameters.AddWithValue("@CreatedDate", smallDateTimeValue);
 
                     connection.Open();
 
                     object result = command.ExecuteScalar();
 
-                    if (result != null && int.TryParse(result.ToString(), out int insertedID))
-                        return insertedID;
+                    if (result != null && int.TryParse(result.ToString(), out int insertedId))
+                        return insertedId;
                     else
                         return -1;
                 }
@@ -48,16 +48,16 @@ namespace DVLD.Data
 
 
         // ----------------------Read----------------------------
-        public static Driver GetByID(int driverID)
+        public static Driver GetByDriverId(int driverId)
         {
-            string query = @"SELECT * FROM Drivers WHERE DriverID = @driverID;";
+            string query = @"SELECT * FROM Drivers WHERE DriverId = @driverId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@driverID", driverID);
+                    command.Parameters.AddWithValue("@driverId", driverId);
                     connection.Open();
 
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -66,9 +66,9 @@ namespace DVLD.Data
                         {
                             return new Driver
                             (
-                                Convert.ToInt32(reader["DriverID"]),
-                                Convert.ToInt32(reader["PersonID"]),
-                                Convert.ToInt32(reader["CreatedByUserID"]),
+                                Convert.ToInt32(reader["DriverId"]),
+                                Convert.ToInt32(reader["PersonId"]),
+                                Convert.ToInt32(reader["CreatedByUserId"]),
                                 Convert.ToDateTime(reader["CreatedDate"])
                             );
                         }
@@ -84,16 +84,16 @@ namespace DVLD.Data
             }
         }
 
-        public static Driver GetByPersonID(int personID)
+        public static Driver GetByPersonId(int personId)
         {
-            string query = "SELECT * FROM Drivers WHERE PerosnID = @personID;";
+            string query = "SELECT * FROM Drivers WHERE PerosnId = @personId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@personID", personID);
+                    command.Parameters.AddWithValue("@personId", personId);
                     connection.Open();
 
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -102,9 +102,9 @@ namespace DVLD.Data
                         {
                             return new Driver
                             (
-                                Convert.ToInt32(reader["DriverID"]),
-                                Convert.ToInt32(reader["PersonID"]),
-                                Convert.ToInt32(reader["CreatedByUserID"]),
+                                Convert.ToInt32(reader["DriverId"]),
+                                Convert.ToInt32(reader["PersonId"]),
+                                Convert.ToInt32(reader["CreatedByUserId"]),
                                 Convert.ToDateTime(reader["CreatedDate"])
                             );
                         }
@@ -119,16 +119,17 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsPersonUsed(int personID)
+        public static bool IsPersonUsed(int personId, int excludedDriverId)
         {
-            string query = "SELECT 1 FROM Drivers WHERE PerosnID = @personID;";
+            string query = "SELECT 1 FROM Drivers WHERE PerosnId = @personId AND DriverId != excludedDriverId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@personID", personID);
+                    command.Parameters.AddWithValue("@excludedDriverId", excludedDriverId);
+                    command.Parameters.AddWithValue("@personId", personId);
                     connection.Open();
 
                     return command.ExecuteScalar() != null;
@@ -141,19 +142,16 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsPersonUsed(int personID, int excludedDriverID)
+        public static bool Exists(int driverId)
         {
-            string query = "SELECT 1 FROM Drivers WHERE PerosnID = @personID AND DriverID != excludedDriverID;";
-
+            string query = "SELECT 1 FROM Drivers WHERE DriverId = @driverId;";
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@excludedDriverID", excludedDriverID);
-                    command.Parameters.AddWithValue("@personID", personID);
+                    command.Parameters.AddWithValue("@driverId", driverId);
                     connection.Open();
-
                     return command.ExecuteScalar() != null;
                 }
             }
@@ -200,16 +198,16 @@ namespace DVLD.Data
         public static bool Update(Driver driver)
         {
             string query = @"UPDATE Drivers
-                            SET PersonID = @personID
-                            WHERE DriverID = @driverID;";
+                            SET PersonId = @personId
+                            WHERE DriverId = @driverId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@personID", driver.PersonID);
-                    command.Parameters.AddWithValue("@driverID", driver.DriverID);
+                    command.Parameters.AddWithValue("@personId", driver.PersonId);
+                    command.Parameters.AddWithValue("@driverId", driver.DriverId);
 
                     connection.Open();
 
@@ -225,16 +223,16 @@ namespace DVLD.Data
 
 
         // --------------------Delete-----------------------------
-        public static bool DeleteByDriverID(int driverID)
+        public static bool DeleteByDriverId(int driverId)
         {
-            string query = @"DELETE FROM Drivers WHERE DriverID = @driverID;";
+            string query = @"DELETE FROM Drivers WHERE DriverId = @driverId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@driverID", driverID);
+                    command.Parameters.AddWithValue("@driverId", driverId);
                     
                     connection.Open();
                     return command.ExecuteNonQuery() > 0;
@@ -242,21 +240,21 @@ namespace DVLD.Data
             }
             catch (Exception ex)
             {
-                AppLogger.LogError($"DAL: Error while deleting form Drivers where driver id = {driverID}", ex);
+                AppLogger.LogError($"DAL: Error while deleting form Drivers where driver id = {driverId}", ex);
                 throw;
             }
         }
 
-        public static bool DeleteByPersonID(int personID)
+        public static bool DeleteByPersonId(int personId)
         {
-            string query = @"DELETE FROM Drivers WHERE PersonID = @personID;";
+            string query = @"DELETE FROM Drivers WHERE PersonId = @personId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@personID", personID);
+                    command.Parameters.AddWithValue("@personId", personId);
                     connection.Open();
                     
                     return command.ExecuteNonQuery() > 0;
@@ -264,7 +262,7 @@ namespace DVLD.Data
             }
             catch (Exception ex)
             {
-                AppLogger.LogError($"DAL: Error while deleting from Drivers where person id = {personID}.", ex);
+                AppLogger.LogError($"DAL: Error while deleting from Drivers where person id = {personId}.", ex);
                 throw;
             }
         }

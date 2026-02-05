@@ -41,8 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationTypeBusiness.cs" />
     <Compile Include="CountryBusiness.cs" />
     <Compile Include="DriverBusiness.cs" />
+    <Compile Include="EntityValidators\ApplicationTypeValidator.cs" />
     <Compile Include="EntityValidators\DriverValidator.cs" />
     <Compile Include="EntityValidators\TestTypeValidator.cs" />
     <Compile Include="EntityValidators\UserValidator.cs" />

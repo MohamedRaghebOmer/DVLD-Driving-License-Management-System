@@ -41,7 +41,7 @@ namespace DVLD.Core.Validators
             else if (!person.Email.Contains("@") || !person.Email.Contains("."))
                 throw new ValidationException("Invalid email address.");
 
-            if (person.NationalityCountryID <= 0)
+            if (person.NationalityCountryId <= 0)
                 throw new ValidationException("Nationality is required.");
 
             if (person.ImagePath == null)

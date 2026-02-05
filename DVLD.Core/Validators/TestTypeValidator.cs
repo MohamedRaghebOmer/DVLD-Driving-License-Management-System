@@ -13,7 +13,7 @@ namespace DVLD.Core.Validators
             if (testType == null)
                 throw new ValidationException("Test type can't be empty.");
 
-            if (testType.TestTypeID < 1)
+            if (testType.TestTypeId < 1)
                 throw new ValidationException("Test type id must be a positive integer.");
 
             if (string.IsNullOrWhiteSpace(testType.TestTypeTitle))

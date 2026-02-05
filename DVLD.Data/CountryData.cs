@@ -1,20 +1,20 @@
 ﻿using System;
-using DVLD.Data.Settings;
-using System.Data.SqlClient;
-using DVLD.Core.Logging;
-using DVLD.Core.DTOs.Entities;
 using System.Data;
+using System.Data.SqlClient;
+using DVLD.Data.Settings;
+using DVLD.Core.DTOs.Entities;
+using DVLD.Core.Logging;
 
 namespace DVLD.Data
 {
     public static class CountryData
     {
         // -------------------------Create----------------------
-        public static int AddNew(Country country)
+        public static int Add(Country country)
         {
             string query = @"INSERT INTO Countries(CountryName)
                             VALUES(@countryName)
-                            SELECT SCOPE_IDENTITY();";
+                            SELECT SCOPE_IdENTITY();";
             
             try
             {
@@ -27,8 +27,8 @@ namespace DVLD.Data
 
                     object result = command.ExecuteScalar();
 
-                    if (result != null && int.TryParse(result.ToString(), out int insertedID))
-                        return insertedID;
+                    if (result != null && int.TryParse(result.ToString(), out int insertedId))
+                        return insertedId;
 
                     return -1;
                 }
@@ -42,25 +42,25 @@ namespace DVLD.Data
 
 
         // -------------------------Read------------------------
-        public static Country GetCountry(int countryID)
+        public static Country Get(int countryId)
         {
             string query = @"SELECT CountryName
                             FROM Countries
-                            WHERE CountryID = @countryID;";
+                            WHERE CountryId = @countryId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@countryID", countryID);
+                    command.Parameters.AddWithValue("@countryId", countryId);
                 
                     connection.Open();
 
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
-                            return new Country(countryID, reader.GetString(reader.GetOrdinal("CountryName")));
+                            return new Country(countryId, reader.GetString(reader.GetOrdinal("CountryName")));
                         else
                             return null;
                     }
@@ -73,18 +73,49 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsExists(int countryID)
+        public static Country Get(string countryName)
         {
-            string query = @"SELECT 1
+            string query = @"SELECT CountryId, CountryName
                             FROM Countries
-                            WHERE CountryID = @countryID;";
+                            WHERE LOWER(CountryName) = LOWER(@countryName);";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@countryID", countryID);
+                    command.Parameters.AddWithValue("@countryName", countryName);
+
+                    connection.Open();
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                            return new Country(reader.GetInt32(reader.GetOrdinal("CountryId")), reader.GetString(reader.GetOrdinal("CountryName")));
+                        else
+                            return null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError("DAL: Error while selecting from Countries table.", ex);
+                throw;
+            }
+        }
+
+        public static bool Exists(int countryId)
+        {
+            string query = @"SELECT 1
+                            FROM Countries
+                            WHERE CountryId = @countryId;";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@countryId", countryId);
 
                     connection.Open();
 
@@ -98,43 +129,18 @@ namespace DVLD.Data
             }
         }
 
-        public static bool IsExists(string countryName)
-        {
-            string query = @"SELECT 1
-                            FROM Countries
-                            WHERE LOWER(CountryName) = LOWER(@countryName);";
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@countryName", countryName);
-
-                    connection.Open();
-
-                    return command.ExecuteScalar() != null;
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while selecting from Countries.", ex);
-                throw;
-            }
-        }
-
-        public static bool IsExists(string countryName, int excludedID)
+        public static bool IsCountryNameUsed(string countryName, int excludedId)
         {
             string query = @"SELECT 1 
                             FROM Countries 
-                            WHERE LOEWR(CountryName) = LOWER(@countryName) AND CountryID != @excludedId;";
+                            WHERE LOEWR(CountryName) = LOWER(@countryName) AND CountryId != @excludedId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@excludedId", excludedID);
+                    command.Parameters.AddWithValue("@excludedId", excludedId);
                     command.Parameters.AddWithValue("@countryName", countryName);
 
                     connection.Open();
@@ -152,7 +158,7 @@ namespace DVLD.Data
 
         public static DataTable GetAll()
         {
-            string query = @"SELECT CountryID, CountryName
+            string query = @"SELECT CountryId, CountryName
                             FROM Countries
                             ORDER BY CountryName;";
             try
@@ -184,7 +190,7 @@ namespace DVLD.Data
         {
             string query = @"UPDATE Countries
                             SET CountryName = @newCountryName
-                            WHERE CountryID = @countryID;";
+                            WHERE CountryId = @countryId;";
 
             try
             {
@@ -192,7 +198,7 @@ namespace DVLD.Data
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@newCountryName", country.CountryName);
-                    command.Parameters.AddWithValue("@countryID", country.CountryID);
+                    command.Parameters.AddWithValue("@countryId", country.CountryId);
 
                     connection.Open();
 
@@ -208,17 +214,17 @@ namespace DVLD.Data
 
 
         // ------------------------Delete-----------------------
-        public static bool Delete(int countryID)
+        public static bool Delete(int countryId)
         {
             string query = @"DELETE FROM Countries
-                            WHERE CountryID = @countryID;";
+                            WHERE CountryId = @countryId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@countryID", countryID);
+                    command.Parameters.AddWithValue("@countryId", countryId);
 
                     connection.Open();
 
@@ -231,5 +237,28 @@ namespace DVLD.Data
                 throw;
             }
         }
+
+        public static bool Delete(string countryName)
+        {
+            string query = @"DELETE FROM Countries
+                            WHERE LOWER(CountryName) = LOWER(@countryName);";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@countryName", countryName);
+                    connection.Open();
+                    return command.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError("DAL: Error while deleting from Countries.", ex);
+                throw;
+            }
+        }
+
     }
 }

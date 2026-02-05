@@ -10,16 +10,16 @@ namespace DVLD.Business.EntityValidators
         {
             Core.Validators.TestTypeValidator.Validate(testType);
 
-            if (TestTypeData.IsExists(testType.TestTypeTitle))
-                throw new ValidationException("The title is already associated with another test type.");
+            if (TestTypeData.IsTitleUsed(testType.TestTypeTitle, -1))
+                throw new BusinessException("The title is already associated with another test type.");
         }
 
         public static void UpdateValidator(TestType testType)
         {
             Core.Validators.TestTypeValidator.Validate(testType);
 
-            if (TestTypeData.IsTitleUsed(testType.TestTypeTitle, testType.TestTypeID))
-                throw new ValidationException("The title is already associated with another test type.");
+            if (TestTypeData.IsTitleUsed(testType.TestTypeTitle, testType.TestTypeId))
+                throw new BusinessException("The title is already associated with another test type.");
         }
     }
 }
