@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="DTOs\Entities\ApplicationType.cs" />
     <Compile Include="DTOs\Entities\Driver.cs" />
+    <Compile Include="DTOs\Entities\License.cs" />
     <Compile Include="DTOs\Entities\TestType.cs" />
     <Compile Include="Logging\AppLogger.cs" />
     <Compile Include="DTOs\Entities\Country.cs" />
