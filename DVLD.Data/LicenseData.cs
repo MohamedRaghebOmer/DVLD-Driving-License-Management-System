@@ -1,10 +1,11 @@
-﻿using System;
-using System.Data;
-using System.Data.SqlClient;
+﻿using DVLD.Core.DTOs.Entities;
+using DVLD.Core.DTOs.Enums;
 using DVLD.Core.Logging;
 using DVLD.Data.Settings;
-using DVLD.Core.DTOs.Entities;
-using DVLD.Core.DTOs.Enums;
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DVLD.Data
 {
@@ -193,7 +194,7 @@ namespace DVLD.Data
             }
         }
 
-        public static bool ExistsByLicenseId(int licenseId)
+        public static bool Exists(int licenseId)
         {
             string query = @"SELECT 1 FROM Licenses WHERE LicenseID = @licenseId;";
 
@@ -215,7 +216,7 @@ namespace DVLD.Data
             }
         }
 
-        public static bool ExistsByApplicationId(int applicationId)
+        public static bool DoesApplicationIdExits(int applicationId)
         {
             string query = @"SELECT 1 FROM Licenses WHERE ApplicationID = @applicationId;";
             
@@ -232,6 +233,30 @@ namespace DVLD.Data
             catch (Exception ex)
             {
                 AppLogger.LogError($"DAL: Error while checking existence of license with ApplicationID {applicationId}.", ex);
+                throw;
+            }
+        }
+
+        public static bool DoesDriverHasActiveLicense(int driverId, LicenseClass licenseClass)
+        {
+            string query = @"SELECT 1 FROM Licenses WHERE DriverID = @Id AND LicenseClass = @class AND IsActive = 1 AND ExpirationDate > @todayDate;";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", driverId);
+                    command.Parameters.AddWithValue("@class", (int)licenseClass);
+                    command.Parameters.AddWithValue("@todayDate", DateTime.Now);
+                    connection.Open();
+
+                    return command.ExecuteScalar() != null;
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"DAL: Error while license with driver id = {driverId}.", ex);
                 throw;
             }
         }

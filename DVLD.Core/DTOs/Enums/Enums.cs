@@ -20,4 +20,14 @@
         ReplacementLost = 3,
         ReplacementDamaged = 4
     }
+
+    public enum ApplicationType
+    {
+       NewLocalDrivingLicenseService = 1,
+       RenewDrivingLicenseService = 2,
+       ReplacementForLostDrivingLicense = 3,
+       ReplacementForDamagedDrivingLicense = 4,
+       ReleaseDetainedDrivingLicense = 5,
+       NewInternationalLicense = 6
+    }
 }
