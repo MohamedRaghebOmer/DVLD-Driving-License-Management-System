@@ -1,118 +1,43 @@
 ﻿using System;
-using System.Data;
 using System.Data.SqlClient;
 using DVLD.Data.Settings;
-using DVLD.Core.DTOs.Entities;
 using DVLD.Core.Logging;
+using System.Collections.Generic;
+using DVLD.Core.DTOs.Enums;
 
 namespace DVLD.Data
 {
     public static class ApplicationTypeData
     {
-        // --------------------------Create--------------------------
-        public static int Add(ApplicationType type)
+        public static decimal GetFees(ApplicationType applicationType)
         {
-            string query = @"INSERT INTO ApplicationTypes(ApplicationTypeTitle, ApplicationTypeFees)
-                            VALUES(@title, @fees); SELECT SCOPE_IdENTITY();";
+            string query = "SELECT Fees FROM ApplicationTypes WHERE ApplicationTypeId = @ApplicationTypeId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@title", type.ApplicationTypeTitle);
-                    command.Parameters.AddWithValue("@fees", type.ApplicationFees);
+                    command.Parameters.AddWithValue("@ApplicationTypeId", (int)applicationType);
                     connection.Open();
 
                     object result = command.ExecuteScalar();
 
-                    if (result != null && int.TryParse(result.ToString(), out int newId))
-                        return newId;
-
-                    return -1;
+                    if (result != null && decimal.TryParse(result.ToString(), out decimal fees))
+                        return fees;
                 }
+                return -1; // Return -1 if the application type is not found or if the value is invalid
             }
             catch (Exception ex)
             {
-                AppLogger.LogError("DAL: Error while inserting into ApplicationTypes.", ex);
+                AppLogger.LogError($"DAL: Error while fetching fees for application type {applicationType}.", ex);
                 throw;
             }
         }
 
-
-        // --------------------------Read--------------------------
-        public static ApplicationType Get(int applicationTypeId)
+        public static List<string> GetAllApplicationTypeTitles()
         {
-            string query = @"SELECT *
-                            FROM ApplicationTypes
-                            WHERE ApplicationTypeId = @id";
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@id", applicationTypeId);
-                    connection.Open();
-
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            return new ApplicationType
-                            (
-                                applicationTypeId: Convert.ToInt32(reader["ApplicationTypeId"]),
-                                applicationTypeTitle: reader["ApplicationTypeTitle"].ToString(),
-                                applicationFees: Convert.ToDecimal(reader["ApplicationTypeFees"])
-                            );
-                        }
-                    }
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while retrieving from ApplicationTypes.", ex);
-                throw;
-            }
-        }
-
-        public static ApplicationType Get(string applicationTypeTitle)
-        {
-            string query = "SELECT * FROM ApplicationTypes WHERE ApplicationTypeTitle = @title;";
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@title", applicationTypeTitle);
-                    connection.Open();
-
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            return new ApplicationType
-                            (
-                                applicationTypeId: Convert.ToInt32(reader["ApplicationTypeId"]),
-                                applicationTypeTitle: reader["ApplicationTypeTitle"].ToString(),
-                                applicationFees: Convert.ToDecimal(reader["ApplicationTypeFees"])
-                            );
-                        }
-                    }
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while retrieving from ApplicationTypes.", ex);
-                throw;
-            }
-        }
-
-        public static DataTable GetAll()
-        {
-            string query = "SELECT * FROM ApplicationTypes;";
+            string query = "SELECT ApplicationTypeTitle FROM ApplicationTypes;";
 
             try
             {
@@ -123,148 +48,44 @@ namespace DVLD.Data
 
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        if (reader.HasRows)
+                        List<string> titles = new List<string>();
+                        while (reader.Read())
                         {
-                            DataTable dt = new DataTable();
-                            dt.Load(reader);
-                            return dt;
+                            titles.Add(reader["ApplicationTypeTitle"].ToString());
                         }
+                        return titles;
                     }
                 }
-                return null;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 AppLogger.LogError("DAL: Error while retrieving from ApplicationTypes.", ex);
                 throw;
             }
         }
 
-        public static bool Exists(int applicationTypeId)
+        public static bool UpdateFees(ApplicationType applicationType, decimal newFees)
         {
-            string query = "SELECT 1 FROM ApplicationTypes WHERE ApplicationTypeId = @id;";
+            string query = "UPDATE ApplicationTypes SET Fees = @Fees WHERE ApplicationTypeId = @ApplicationTypeId;";
 
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@id", applicationTypeId);
+                    command.Parameters.AddWithValue("@Fees", newFees);
+                    command.Parameters.AddWithValue("@ApplicationTypeId", (int)applicationType);
                     connection.Open();
 
-                    return command.ExecuteScalar() != null;
-                }
-            }
-            catch(Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while checking existance form ApplicationTypes.", ex);
-                throw;
-            }
-        }
-
-        public static bool IsTitleUsed(string applicationTypeTitle, int excludedApplicationTypeId)
-        {
-            string query = "SELECT 1 FROM ApplicationTypes WHERE LOWER(ApplicationTypeTitle) = LOWER(@title) AND ApplicationTypeId != @excludedId";
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@title", applicationTypeTitle);
-                    command.Parameters.AddWithValue("@excludedId", excludedApplicationTypeId);
-                    connection.Open();
-
-                    return command.ExecuteScalar() != null;
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0; // Return true if the update was successful
                 }
             }
             catch (Exception ex)
             {
-                AppLogger.LogError("DAL: Error while checking existance form ApplicationTypes.", ex);
+                AppLogger.LogError($"DAL: Error while updating fees for application type {applicationType}.", ex);
                 throw;
             }
-
-
-        }
-
-            
-        // -------------------------Update---------------------------
-        public static bool Update(ApplicationType applicationType)
-        {
-            string query = @"UPDATE ApplicationTypes
-                           SET ApplicationTypeTitle = @newTitle, ApplicationTypeFees = @newFees
-                           WHERE ApplicationTypeId = @id;";
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@newTitle", applicationType.ApplicationTypeTitle);
-                    command.Parameters.AddWithValue("@newFees", applicationType.ApplicationFees);
-                    command.Parameters.AddWithValue("@id", applicationType.ApplicationTypeId);
-                    connection.Open();
-
-                    return command.ExecuteNonQuery() > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while updating ApplicationTypes.", ex);
-                throw;
-            }
-
-
-        }
-
-
-        // ------------------------Delete----------------------------
-        public static bool Delete(int applicationTypeId)
-        {
-            string query = @"DELETE FROM ApplicationTypes WHERE ApplicationTypeId = @id;";
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@id", applicationTypeId);
-                    connection.Open();
-
-                    return command.ExecuteNonQuery() > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while deleteing form ApplicationTypes.", ex);
-                throw;
-            }
-
-
-        }
-
-        public static bool Delete(string applicationTypeTitle)
-        {
-            string query = "DELETE FROM ApplicationTypes WHERE ApplicationTypeTitle = @title;";
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@title", applicationTypeTitle);
-                    connection.Open();
-
-                    return command.ExecuteNonQuery() > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while deleting form form ApplicationTypes.", ex);
-                throw;
-            }
-
-
         }
     }
 }
