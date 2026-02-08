@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
-using DVLD.Core.DTOs.Entities;
+﻿using DVLD.Core.DTOs.Entities;
 using DVLD.Core.DTOs.Enums;
 using DVLD.Core.Exceptions;
 using DVLD.Data;

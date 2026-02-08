@@ -82,7 +82,7 @@ namespace DVLD.Data
             }
         }
 
-        public static DataTable GetByDriverId(int driverId)
+        public static DataTable GetDriverLicenses(int driverId)
         {
             string query = "SELECT * FROM Licenses WHERE DriverID = @DriverID;";
 
@@ -153,47 +153,6 @@ namespace DVLD.Data
             }
         }
 
-        public static License GetByAppilcationId(int appilcationId)
-        {
-            string query = "SELECT * FROM Licenses WHERE ApplicationID = @ApplicationID;";
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@ApplicationID", appilcationId);
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            return new License
-                            (
-                                licenseId: Convert.ToInt32(reader["LicenseID"]),
-                                applicationId: Convert.ToInt32(reader["ApplicationID"]),
-                                driverId: Convert.ToInt32(reader["DriverID"]),
-                                licenseClass: (LicenseClass)Convert.ToInt32(reader["LicenseClass"]),
-                                issueDate: Convert.ToDateTime(reader["IssueDate"]),
-                                expirationDate: Convert.ToDateTime(reader["ExpirationDate"]),
-                                notes: reader["Notes"] != null ? reader["Notes"].ToString() : string.Empty,
-                                paidFees: Convert.ToDecimal(reader["PaidFees"]),
-                                isActive: Convert.ToBoolean(reader["IsActive"]),
-                                issueReason: (IssueReason)Convert.ToInt32(reader["IssueReason"]),
-                                createdByUserId: Convert.ToInt32(reader["CreatedByUserID"])
-                            );
-                        }
-                    }
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError($"DAL: Error while fetching license with ApplicationID {appilcationId}.", ex);
-                throw;
-            }
-        }
-
         public static bool Exists(int licenseId)
         {
             string query = @"SELECT 1 FROM Licenses WHERE LicenseID = @licenseId;";
@@ -219,7 +178,7 @@ namespace DVLD.Data
         public static bool DoesApplicationIdExits(int applicationId)
         {
             string query = @"SELECT 1 FROM Licenses WHERE ApplicationID = @applicationId;";
-            
+
             try
             {
                 using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
@@ -281,6 +240,72 @@ namespace DVLD.Data
             catch (Exception ex)
             {
                 AppLogger.LogError($"DAL: Error while checking if license with ID {licneseId} is active.", ex);
+                throw;
+            }
+        }
+
+        public static bool UpdateLicense(License license)
+        {
+            string query = @"UPDATE Licenses SET Notes = @notes, PaidFees = @paidFees, IsActive = @isActive 
+                            WHERE LicenseID = @licenseId;";
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@notes", license.Notes ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@paidFees", license.PaidFees);
+                    command.Parameters.AddWithValue("@isActive", license.IsActive);
+                    command.Parameters.AddWithValue("@licenseId", license.LicenseId);
+                    connection.Open();
+                    return command.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"DAL: Error while updating license with ID {license.LicenseId}.", ex);
+                throw;
+            }
+        }
+
+        public static bool DeactivateLicense(int licenseId)
+        {
+            string query = "UPDATE Licenses SET IsActive = 0 WHERE LicenseId = @LicenseId;";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@LicenseId", licenseId);
+                    connection.Open();
+                    return command.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"DAL: Error while deactivating license with ID {licenseId}.", ex);
+                throw;
+            }
+        }
+
+        public static bool ReactivateLicense(int licenseId)
+        {
+            string query = "UPDATE Licenses SET IsActive = 1 WHERE LicenseId = @LicenseId;";
+            
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@LicenseId", licenseId);
+                    connection.Open();
+                    return command.ExecuteNonQuery() > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError($"DAL: Error while reactivating license with ID {licenseId}.", ex);
                 throw;
             }
         }

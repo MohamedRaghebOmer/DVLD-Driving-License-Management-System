@@ -10,36 +10,6 @@ namespace DVLD.Data
 {
     public static class LicenseClassData
     {
-        public static DataTable GetAll()
-        {
-            string query = "SELECT * FROM LicenseClasses;";
-
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(DataSettings.connectionString))
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    connection.Open();
-
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.HasRows)
-                        {
-                            DataTable dataTable = new DataTable();
-                            dataTable.Load(reader);
-                            return dataTable;
-                        }
-                    }
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogError("DAL: Error while fetching all license classes.", ex);
-                throw;
-            }
-        }
-
         public static int GetMinimumAllowedAge(LicenseClass licenseClass)
         {
             string query = "SELECT MinimumAllowedAge FROM LicenseClasses WHERE LicenseClassId = @LicenseClassId;";
@@ -135,7 +105,7 @@ namespace DVLD.Data
             }
         }
 
-        public static bool UpdateDafaultValidityLength(LicenseClass licenseClass, int newValidityLength)
+        public static bool UpdateDefaultValidityLength(LicenseClass licenseClass, int newValidityLength)
         {
             string query = "UPDATE LicenseClasses SET DefaultValidityLength = @DefaultValidityLength WHERE LicenseClassId = @LicenseClassId;";
             try
